@@ -7,15 +7,15 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
+        background-color: #5072a7; /* Background color */
+        color: white; /* Font color */
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background-color: #f4f4f4;
       }
       .container {
         text-align: center;
+        padding: 20px;
       }
       .title {
         font-size: 3em;
@@ -35,13 +35,14 @@
         align-items: flex-start;
         width: 100%;
         max-width: 1200px;
-        margin: 0 auto;
-      }
-      .text-box {
-        flex: 1;
+        margin: 20px 0;
         padding: 20px;
         background-color: #fff;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        color: black; /* Ensure text inside content sections is readable */
+      }
+      .text-box {
+        flex: 1;
         margin-right: 20px;
       }
       .image {
@@ -63,14 +64,14 @@
       }
       .image-row {
         display: flex;
-        justify-content: space-around;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 20px; /* Space between images */
+        justify-content: center;
       }
       .image-item {
-        flex: 1;
-        max-width: 30%;
+        flex: 1 1 calc(33.333% - 20px); /* 3 items per row minus gap */
         box-sizing: border-box;
+        max-width: calc(33.333% - 20px); /* Ensure no overflow */
       }
       .image-item img {
         width: 100%;
@@ -80,7 +81,24 @@
       .caption {
         margin-top: 10px;
         font-size: 1em;
-        color: #333;
+        color: grey;
+      }
+      .caption2 {
+        margin-top: 10px;
+        font-size: 1em;
+        color: white;
+      }
+      .section-header {
+        font-size: 2.5em;
+        margin: 40px 0 20px;
+        text-align: center;
+        color: #5072a7; /* Slightly darker section header color */
+      }
+      .blue-text {
+        color: #5072a7;
+      }
+      .white-text {
+        color: white;
       }
     </style>
   </head>
@@ -90,37 +108,183 @@
       <div class="subtitle">CS 180 - Fall 2024</div>
       <div class="author">By, Ediz Ertekin Jr.</div>
     </div>
+    <div class="partition section-header">Project Overview</div>
     <div class="content">
       <div class="text-box">
         <p>
-          For the project 1 of CS 180, our goal was to restore and align three
-          color channel images from digitized glass plate images. We can do this
-          by placing the three images on top of each other so that they form a
-          single RGB color image. I first implemented a naive approach by
-          exhasutive search to find the best alignment. Then, I implemented a
-          more efficient approach for larger images such as .tif files by using
-          a recursive method and an image pyramid.
+          The goal of this assignment is to take the digitized Prokudin-Gorskii
+          glass plate images and, using image processing techniques,
+          automatically produce a color image with as few visual artifacts as
+          possible. This process includes extracting the three color channel
+          images, placing them on top of each other, and aligning them so that
+          they form a single RGB color image. <br /><br />
+          Another goal of this project is to implement both a single-scale and a
+          multi-scale image alignment algorithm to account for smaller .jpg and
+          larger .tif files. On the right I have included a workflow image taken
+          from the CS 180 lecture 1 slide deck. I believe that it depicts a nice
+          overview of the project.
         </p>
       </div>
       <div class="image">
-        <img src="photos/emir_aligned_2.jpg" alt="Emir Selfie" />
+        <img src="photos/transition.png" alt="Intro Pic" />
+      </div>
+    </div>
+
+    <div class="partition section-header">Single-Scale Implementation</div>
+    <div class="content">
+      <div class="text-box">
+        <p>
+          For my single-scale implementation I used an exhaustive search over a
+          window of possible displacements, and took the displacement with the
+          best score. In order to calculate the displacement I took the L2 norm
+          also known as the Euclidean Distance. I assigned a default best score
+          and displacement array to store the x and y displacement values. I
+          used for loops over a [-15, 15] range along with np.roll() to slide
+          the image and to calculate the L2 norm and would save the displacement
+          if it resulted in a lower score than what I had defined as best.
+        </p>
+      </div>
+      <div class="image">
+        <img src="photos/monastery_aligned_naive.jpg" alt="Emir Selfie" />
+      </div>
+    </div>
+
+    <div class="partition section-header">
+      Multi-Scale Pyramid Implementation
+    </div>
+    <div class="content">
+      <div class="text-box">
+        <p>
+          For my multi-scale pyramid implementation I used a recursive function
+          that would downscale the image. I used the recommended function
+          sk.transform.rescale() to downscale the images and take account of the
+          best displacement as the image was scaled. I also implemented a helper
+          function that takes in a displacement and two channels and calculates
+          the L2 norm and stores the x and y displacements for the altered
+          channel.
+        </p>
+      </div>
+      <div class="image">
+        <img src="photos/monastery.jpg" alt="Emir Selfie" />
+      </div>
+    </div>
+
+    <div class="partition section-header">Bells and Whistles</div>
+    <div class="content">
+      <div class="text-box">
+        <p>
+          For my first bells and whistles, I tried to use better features by
+          using edge detection. I used the canny edge detection algorithm to
+          detect the edges of the images. I then used the edges to calculate the
+          displacement of the images. On the right, I have included the edged
+          detected image from the emir.tif image. The only downside I found to
+          implementing this was that on average each image took 12-15 seconds
+          longer to compute.<br /><br />
+
+          For my second bells and whistles I wanted to apply auto contrast
+          similar to how Jeffrey Tan did it from Fall 23. I created an auto
+          contrast function that took in a channel as an argument and converts
+          the values to unsigned byte format, with values in [0, 255]. Then
+          following the instructions from his website, I used the cumulative
+          histogram to calculate frequency of each pixel intensity value. Then
+          for each pixel in the channel I calculated a new intensity based on
+          the prefix array. This allowed me to apply auto contrast to each
+          channel before combining them with np.dstack().
+        </p>
+      </div>
+      <div class="image">
+        <img src="photos/emir_headshot.png" alt="Emir Selfie" width="400" />
+      </div>
+    </div>
+
+    <div class="image-row">
+      <div class="image-item">
+        <img src="photos/monastery_aligned_naive.jpg" alt="Monastery Image" />
+        <div class="caption2">
+          This is the result of my single-scale implementation
+        </div>
+      </div>
+      <div class="image-item">
+        <img src="photos/monastery.jpg" alt="Monastery Image" />
+        <div class="caption2">
+          This is the result of my multi-scale implementation with edge
+          detection
+        </div>
+      </div>
+      <div class="image-item">
+        <img src="photos/monastery_contrast.jpg" alt="Monastery Image" />
+        <div class="caption2">
+          This is the result of my multi-scale implementation with edge
+          detection and auto contrast
+        </div>
+      </div>
+    </div>
+
+    <div class="partition section-header">Photo Gallery</div>
+    <div class="partition">
+      <h2 class="blue-text">.jpg Images</h2>
+      <div class="image-row">
+        <div class="image-item">
+          <img src="photos/cathedral.jpg" alt="Cathedral Image" />
+          <div class="caption">Runtime: 0.28, G:(5, 2), R:(12, 3)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/monastery_contrast.jpg" alt="Monastery Image" />
+          <div class="caption">Runtime: 0.37, G:(-3, 2), R:(3, 2)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/tobolsk.jpg" alt="Tobolsk Image" />
+          <div class="caption">Runtime: 0.28, G:(3, 2), R:(6, 3)</div>
+        </div>
       </div>
     </div>
 
     <div class="partition">
-      <h2>.jpg Images</h2>
+      <h2 class="blue-text">.tif Images</h2>
       <div class="image-row">
         <div class="image-item">
-          <img src="photos/cathedral_aligned_2.jpg" alt="Cathedral Image" />
-          <div class="caption">Runtime: 0.55, G:(5, 2), R:(12, 3)"</div>
+          <img src="photos/church.jpg" alt="Church Image" />
+          <div class="caption">Runtime: 38.37, G:(25, 4), R:(58, -4)</div>
         </div>
         <div class="image-item">
-          <img src="photos/monastery_aligned_2.jpg" alt="Monastery Image" />
-          <div class="caption">Runtime: 0.27, G:(-3, 2), R:(3, 2)</div>
+          <img src="photos/emir.jpg" alt="Emir Image" />
+          <div class="caption">Runtime: 41.75, G:(49, 23), R:(107, 40)</div>
         </div>
         <div class="image-item">
-          <img src="photos/tobolsk_aligned_2.jpg" alt="Tobolsk Image" />
-          <div class="caption">Runtime: 0.26, G:(3, 2), R:(6, 3)</div>
+          <img src="photos/harvesters.jpg" alt="Harvesters Image" />
+          <div class="caption">Runtime: 38.03, G:(60, 18), R:(123, 9)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/icon.jpg" alt="Icon Image" />
+          <div class="caption">Runtime: 38.00, G:(38, 16), R:(88, 22)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/lady.jpg" alt="Lady Image" />
+          <div class="caption">Runtime: 38.56, G:(56, 10), R:(120, 13)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/melons.jpg" alt="Melons Image" />
+          <div class="caption">Runtime: 42.74, G:(79, 9), R:(182, 11)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/onion_church.jpg" alt="Onion Church Image" />
+          <div class="caption">Runtime: 41.23, G:(52, 24), R:(107, 34)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/sculpture.jpg" alt="Sculpture Image" />
+          <div class="caption">Runtime: 37.50, G:(33, -11), R:(140, -27)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/self_portrait.jpg" alt="Self Portrait Image" />
+          <div class="caption">Runtime: 37.91, G:(77, 29), R:(175, 37)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/three_generations.jpg" alt="Generations Image" />
+          <div class="caption">Runtime: 37.59, G:(56, 11), R:(111, 7)</div>
+        </div>
+        <div class="image-item">
+          <img src="photos/train.jpg" alt="Train Image" />
+          <div class="caption">Runtime: 38.90, G:(48, 2), R:(84, 28)</div>
         </div>
       </div>
     </div>
