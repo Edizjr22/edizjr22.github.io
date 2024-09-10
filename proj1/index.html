@@ -176,10 +176,16 @@
           For my first bells and whistles, I tried to use better features by
           using edge detection. I used the canny edge detection algorithm to
           detect the edges of the images. I then used the edges to calculate the
-          displacement of the images. On the right, I have included the edged
-          detected image from the emir.tif image. The only downside I found to
-          implementing this was that on average each image took 12-15 seconds
-          longer to compute.<br /><br />
+          displacement of the images. I wanted to use edge detection to better
+          align the images, given that without edge detection, only computing
+          the displacement with the L2 norm, did not perfectly align the
+          channels. The canny edge detection algorithm reduces noise by applying
+          the derivative of a Gaussian to compute intensity. It then filters out
+          insignificant edges by reducing their pixel size and then analyzes the
+          gradient magnitude and direction to find the edges. On the right, I
+          have included the edged detected image from the emir.tif image. The
+          only downside I found to implementing this was that on average each
+          image took 12-15 seconds longer to compute.<br /><br />
 
           For my second bells and whistles I wanted to apply auto contrast
           similar to how Jeffrey Tan did it from Fall 23. I created an auto
