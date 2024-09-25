@@ -33,15 +33,16 @@
           to alter and combine images. The first portion of the project is
           examining how images can be sharpened by applying blur, extracting the
           details, and producing a sharpened image. The next portion was
-          exploring low and high frequency to create high hybriding. The last
+          exploring low and high frequency to create hybrid images. The last
           portion of the project is about Multi-resolution Blending, which means
           blending together images at various frequencies using Gaussian and
-          Laplacian stacks. Below I am showing an image that I sharpened.
+          Laplacian stacks. Below I am showing a hybrid image that I will
+          explain later on.
         </p>
         <img src="results/hybrid_2_cropped.png" alt="Intro Pic" />
 
         <h2 id="finite-difference">Finite Difference Operator</h2>
-        <h3 id="finite-difference-approach">Approach</h3>
+        <h3>Approach</h3>
         <p>
           In the first part of this project I generated finite difference
           operators D_x and D_y, where D_x = np.array([[1, -1]]) and D_y =
@@ -54,7 +55,13 @@
           gradient vector and taking its L2 norm as the final pixel value.
         </p>
         <h3>Gradient magnitude</h3>
-        <p></p>
+        <p>
+          The gradient magnitude computation is np.sqrt(partial_x ** 2 +
+          partial_y ** 2), where partial_x and partial_y are the partial
+          derivatives in the x and y directions. We compute the gradient
+          magnitude of the image in order to generate an edge image. Using a
+          threshold in order to classify what should be considered as an edge.
+        </p>
         <figure>
           <img src="results/pic1.jpg" alt="Original Image" />
           <figcaption>Original Image</figcaption>
@@ -81,7 +88,7 @@
         </div>
 
         <h2 id="dog-filter">Derivative of Gaussian (DoG) Filter</h2>
-        <h3 id="finite-difference-approach">1.2.1 Blurred Finite Difference</h3>
+        <h3>1.2.1 Blurred Finite Difference</h3>
 
         <figure>
           <img src="results/pic6.jpg" alt="Original Image" />
@@ -112,7 +119,9 @@
         <p>
           Between the original and blurred image, it seems that the blurred
           image amplifies the edges because of the thicker lines. Where as the
-          original image has more detailed edges, as well as more noise.
+          original image has more detailed edges, as well as more noise. I also
+          noticed that for the blurred image results the lines are more smooth
+          where as for the original image the lines are more sharp.
         </p>
 
         <div class="image-container">
