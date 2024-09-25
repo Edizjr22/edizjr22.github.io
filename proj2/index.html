@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 180 Project 2 - Fun with Filters and Frequencies</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>CS 180 Project 2: Fun with Filters and Frequencies</h1>
+      <h3>By Ediz Ertekin Jr.</h3>
+    </div>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#introduction">Introduction</a></li>
+          <li><a href="#finite-difference">Finite Difference Operator</a></li>
+          <li><a href="#dog-filter">Derivative of Gaussian (DoG) Filter</a></li>
+          <li><a href="#image-sharpening">Image Sharpening</a></li>
+          <li><a href="#hybrid-images">Hybrid Images</a></li>
+          <li>
+            <a href="#multiresolution-blending">Multiresolution Blending</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <h2 id="introduction">Introduction</h2>
+        <p>
+          This project explores different ways of using filters and frequencies
+          to alter and combine images. The first portion of the project is
+          examining how images can be sharpened by applying blur, extracting the
+          details, and producing a sharpened image. The next portion was
+          exploring low and high frequency to create high hybriding. The last
+          portion of the project is about Multi-resolution Blending, which means
+          blending together images at various frequencies using Gaussian and
+          Laplacian stacks. Below I am showing an image that I sharpened.
+        </p>
+        <img src="results/hybrid_2_cropped.png" alt="Intro Pic" />
+
+        <h2 id="finite-difference">Finite Difference Operator</h2>
+        <h3 id="finite-difference-approach">Approach</h3>
+        <p>
+          In the first part of this project I generated finite difference
+          operators D_x and D_y, where D_x = np.array([[1, -1]]) and D_y =
+          np.array([[1], [-1]]). I then used the two kernels to convolve an
+          image using scipy.signal.convolve2d to produce images of their
+          respective partial derivatives partial_x and partial_y which would
+          generate the edge image. Then I calculated the gradient magnitude
+          image using np.sqrt(partial_x ** 2 + partial_y ** 2), treating the
+          pixel values of the partial derivative images as elements of the
+          gradient vector and taking its L2 norm as the final pixel value.
+        </p>
+        <h3>Gradient magnitude</h3>
+        <p></p>
+        <figure>
+          <img src="results/pic1.jpg" alt="Original Image" />
+          <figcaption>Original Image</figcaption>
+        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="results/pic2.jpg" alt="Horizontal Derivative" />
+            <figcaption>partial_x</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic3.jpg" alt="Vertical Derivative" />
+            <figcaption>partial_y</figcaption>
+          </figure>
+        </div>
+        <div class="image-container">
+          <figure>
+            <img src="results/pic4.jpg" alt="Combined Gradient Magnitude" />
+            <figcaption>Combined Gradient Magnitude</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic5.jpg" alt="Combined Gradient Magnitude" />
+            <figcaption>Binarized Combined Magnitude</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="dog-filter">Derivative of Gaussian (DoG) Filter</h2>
+        <h3 id="finite-difference-approach">1.2.1 Blurred Finite Difference</h3>
+
+        <figure>
+          <img src="results/pic6.jpg" alt="Original Image" />
+          <figcaption>Blurred Original Image</figcaption>
+        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="results/pic7.jpg" alt="Horizontal Derivative" />
+            <figcaption>Horizontal Derivative</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic8.jpg" alt="Vertical Derivative" />
+            <figcaption>Vertical Derivative</figcaption>
+          </figure>
+        </div>
+        <div class="image-container">
+          <figure>
+            <img src="results/pic9.jpg" alt="Combined Gradient Magnitude" />
+            <figcaption>Combined Gradient Magnitude</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic10.jpg" alt="Binarized Gradient Magnitude" />
+            <figcaption>Binarized Combined Magnitude</figcaption>
+          </figure>
+        </div>
+
+        <h3>What differences do you see?</h3>
+        <p>
+          Between the original and blurred image, it seems that the blurred
+          image amplifies the edges because of the thicker lines. Where as the
+          original image has more detailed edges, as well as more noise.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/pic5.jpg" alt="comp 1" />
+            <figcaption>
+              Finite Difference Binarized Combined Magnitude
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic10.jpg" alt="comp 2" />
+            <figcaption>
+              Blurred Finite Difference Binarized Combined Magnitude
+            </figcaption>
+          </figure>
+        </div>
+
+        <h3 id="finite-difference-approach">1.2.2 Derivative of Gaussian</h3>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/pic11.png" alt="DoG_x filter" />
+            <figcaption>DoG_x filter</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic12.png" alt="DoG_y filter" />
+            <figcaption>DoG_y filter</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/pic13.jpg" alt="DoG_x filter" />
+            <figcaption>DoG_x Derivative</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic14.jpg" alt="DoG_y filter" />
+            <figcaption>DoG_y Derivative</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/pic15.jpg" alt="Horizontal Derivative" />
+            <figcaption>Combined Gradient Magnitude</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic16.jpg" alt="Vertical Derivative" />
+            <figcaption>Binarized Combined Magnitude</figcaption>
+          </figure>
+        </div>
+
+        <h3>Comparison</h3>
+        <p>
+          It seems that the results are identical between the binarized blurred
+          finite difference gradient magnitude and the binarized derivative of
+          Gaussian gradient magnitude. There are a few points of noise that are
+          different between the two images.
+        </p>
+        <div class="image-container">
+          <figure>
+            <img src="results/pic10.jpg" alt="Original Image" />
+            <figcaption>Blurred Finite Difference</figcaption>
+          </figure>
+          <figure>
+            <img src="results/pic16.jpg" alt="Horizontal Derivative" />
+            <figcaption>Derivative of Gaussian</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="image-sharpening">Image Sharpening</h2>
+        <p>
+          The next portion of this project involved sharpening images. This can
+          be done by passing a input image through a low pass Gaussian filter to
+          generate a blurred version. In the low pass filter, I parse the image
+          into it's three channels, applying the gaussian to each channel, and
+          then merge the image back together. Next in order to generate the
+          detail of the image, we subtract the blurred version from the original
+          image. Then in order to create the final sharpened image I used the
+          following formula: sharpened = image + alpha * detail. The alpha I
+          used was 1.5 for the taj image.
+        </p>
+
+        <h3>Process</h3>
+        <p>
+          Below I show an example of the sharpen workflow, I first blur the
+          image, then extract the detail, and then sharpen the original image.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/taj.jpg" alt="taj input" />
+            <figcaption>Original Image</figcaption>
+          </figure>
+          <figure>
+            <img src="results/taj_blur.jpg" alt="taj blur" />
+            <figcaption>Blurred Image</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/taj_detail.jpg" alt="taj detail" />
+            <figcaption>Detailed Image</figcaption>
+          </figure>
+          <figure>
+            <img src="results/taj_post.jpg" alt="taj sharp" />
+            <figcaption>Sharpened Image</figcaption>
+          </figure>
+        </div>
+
+        <h3>Results</h3>
+
+        <figure>
+          <img src="results/space.jpg" alt="space input" />
+          <figcaption>Original Image</figcaption>
+        </figure>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/space_blurr.jpg" alt="space input" />
+            <figcaption>Blurred Image</figcaption>
+          </figure>
+          <figure>
+            <img src="results/space_post.jpg" alt="space sharp" />
+            <figcaption>Sharpened blurred Image</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/yosemite.jpg" alt="yosemite input" />
+            <figcaption>Original Image</figcaption>
+          </figure>
+          <figure>
+            <img src="results/yosemite_post.jpg" alt="yosemite sharp" />
+            <figcaption>Sharpened Image</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="hybrid-images">Hybrid Images</h2>
+
+        <p>
+          For the second part of this project we had to create hybrid images,
+          which takes in a two images, one that will go through a low pass
+          filter and one that will go through a high pass filter. The low pass
+          is applied in the form of a gaussian blur using the recommended
+          getGaussianKernel() with the kernel size equal to 6 * sigma. The high
+          pass filter is created by first running the second image through the
+          low pass filter and then passing the blurred image with the original
+          into the high pass in order to perform the following calculation:
+          detail = original - blurred. The last step is to average together the
+          two images to produce the hybrid image.
+        </p>
+
+        <p>
+          I thought it would be cool to create a hybrid image of Robert Downey
+          Jr. and Ironman, because he is one of my favorite super heros. For
+          this hybrid image I used a low sigma of 5 and a high sigma of 5 too.
+        </p>
+
+        <h3>Process</h3>
+
+        <p>
+          Below I first show the two aligned images, then the low pass of the
+          first and the high pass of the second, followed by the genrated hybrid
+          image.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/rdj_aligned.jpg" alt="Original Image" />
+            <figcaption>Aligned Image 1</figcaption>
+          </figure>
+          <figure>
+            <img src="results/ironman_aligned.jpg" alt="ironman" />
+            <figcaption>Aligned Image 2</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/rdj_blurred.jpg" alt="Original Image" />
+            <figcaption>Low frequency image</figcaption>
+          </figure>
+          <figure>
+            <img src="results/ironman_detail.jpg" alt="ironman" />
+            <figcaption>High frequency image</figcaption>
+          </figure>
+        </div>
+
+        <figure>
+          <img src="results/hybrid_2.jpg" alt="rdj + ironman" />
+          <figcaption>Hybrid Image</figcaption>
+        </figure>
+
+        <p>
+          For the past 10 years my family and friends have always said that my
+          brother looks like a younger version of myself. So I thought it would
+          be fun to create a hybrid image of him now (he's a freshman in high
+          school) and a picture of myself from a few years ago. For this hybrid
+          image I used a low sigma of 4 and a high sigma of 4 too.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/edo_2.jpg" alt="Edo" />
+            <figcaption>Low frequency image (Me)</figcaption>
+          </figure>
+          <figure>
+            <img src="results/dev.jpeg" alt="Dev" />
+            <figcaption>High frequency image (Dev)</figcaption>
+          </figure>
+        </div>
+
+        <figure>
+          <img src="results/hybrid_4.jpg" alt="hybrid edo and dev" />
+          <figcaption>Hybrid Image</figcaption>
+        </figure>
+
+        <p>
+          Unfortunately when I tried to created a hybrid image between Jossie
+          and her puppy, I dont think it worked well. This may be due to the
+          dark coloring of the puppies nose, and therefore I consider this one a
+          failure. For this hybrid image I used a low sigma of 2 and a high
+          sigma of 4 too.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/jossie_aligned.jpg" alt="Jossie" />
+            <figcaption>Low frequency image</figcaption>
+          </figure>
+          <figure>
+            <img src="results/mup_aligned.jpg" alt="muppynyo" />
+            <figcaption>High frequency image</figcaption>
+          </figure>
+        </div>
+
+        <figure>
+          <img src="results/hybrid_3.jpg" alt="Jossie + Mupp" />
+          <figcaption>Hybrid image</figcaption>
+        </figure>
+
+        <h2 id="hybrid-images">Fourier Transform</h2>
+        <p>
+          For the Ironman hybrid image, another cool analysis is with the
+          Fourier transform. I applied it to the original images, then both the
+          low and high frequency image and finally to the hybrid image. This
+          produced the following images:
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/ff_og_rdj.jpg" alt="RDJ FT" />
+            <figcaption>Low Frequency Image FT</figcaption>
+          </figure>
+          <figure>
+            <img src="results/ff_og_ironman.jpg" alt="Ironman FT" />
+            <figcaption>High Frequency Image FT</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/rdj_ff.jpg" alt="rdj filtered FT" />
+            <figcaption>Filtered Low Frequency Image FT</figcaption>
+          </figure>
+          <figure>
+            <img src="results/iron_man_ff.jpg" alt="Ironman filtered FT" />
+            <figcaption>Filtered High Frequency Image FT</figcaption>
+          </figure>
+        </div>
+
+        <figure>
+          <img src="results/iron_man_hybrid_ff.jpg" alt="Hybrid FT" />
+          <figcaption>Hybrid Image FT</figcaption>
+        </figure>
+
+        <h2 id="gaussian-laplacian-stacks">Gaussian and Laplacian Stacks</h2>
+        <p>
+          For this portion of the project, rather than creating a gaussian or
+          laplacian pyramid, I generated a stack. This means that we do not have
+          to scale down our image in between each layer. The gaussian stack
+          progressively blurs the inputted image with Gaussian filters and a
+          increasing sigma value. The laplacian stack computes the difference
+          between each adjacent level in the Gaussian stack. The difference
+          represents the high-frequency details lost between each level of
+          blurring. The final level of the Laplacian stack is the same as the
+          last level of the Gaussian stack. In order to visualize the
+          intermediary steps of the laplacian, I had to normalize the output of
+          the laplacian stack with a min max normalization. Below I have
+          attached the gaussian and laplacian stacks. I define a level and sigma
+          variable to alter the results of the stack functions.
+        </p>
+
+        <figure class="stack-image">
+          <img src="results/apple_g.png" alt="apple g" />
+          <figcaption>Apple Gaussian Stack</figcaption>
+        </figure>
+
+        <figure class="stack-image">
+          <img src="results/orange_g.png" alt="orange g" />
+          <figcaption>Orange Gaussian Stack</figcaption>
+        </figure>
+
+        <figure class="stack-image">
+          <img src="results/apple_l.png" alt="apple l" />
+          <figcaption>Apple Laplacian Stack</figcaption>
+        </figure>
+
+        <figure class="stack-image">
+          <img src="results/orange_l.png" alt="orange l" />
+          <figcaption>Orange Laplacian Stack</figcaption>
+        </figure>
+
+        <p>
+          The creation of the ORAPLE! I set levels to 5 and sigma to 2 to
+          generate this blended image.
+        </p>
+
+        <figure class="stack-image">
+          <img src="results/apple_split.png" alt="apple" />
+          <figcaption>Apple + Mask Stack</figcaption>
+        </figure>
+
+        <figure class="stack-image">
+          <img src="results/oraple_split.png" alt="oraple" />
+          <figcaption>Oraple Stack</figcaption>
+        </figure>
+
+        <figure class="stack-image">
+          <img src="results/orange_split.png" alt="orange" />
+          <figcaption>Orange + Mask Stack</figcaption>
+        </figure>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/apple.jpeg" alt="apple" />
+            <figcaption>Apple (Image 1)</figcaption>
+          </figure>
+          <figure>
+            <img src="results/orange.jpeg" alt="orange" />
+            <figcaption>Orange (Image 2)</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/merge1_mask.jpg" alt="Mask" />
+            <figcaption>Mask</figcaption>
+          </figure>
+          <figure>
+            <img src="results/merge1.jpg" alt="ORAPLE" />
+            <figcaption>ORAPLE!</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="multiresolution-blending">Multiresolution Blending</h2>
+        <p>
+          We first input two images (im1 and im2) and a mask image, and compute
+          the gaussian stack and laplacian stack for both of these images. Next
+          we create the gaussian stack for the mask. Once the stacks are
+          generated we can blend the images at each level across the three
+          stacks. The formula would be, blended = (1 - mask_g_stack[i]) *
+          im1_l_stack[i] + mask_g_stack[i] * im2_l_stack[i]. Then once we have
+          created the blended stack we have to reconstruct the blended image by
+          combining the layers of the blended stack.
+        </p>
+
+        <p>
+          For my first blended image, I thought it would be fun to put Jossie's
+          smile on her puppy. Since the hybrid image did not work earlier, I
+          thought I would create a mask to cut out her smile and cropped into
+          onto Muppynyo's image.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/jossie_aligned.jpg" alt="Jossie" />
+            <figcaption>Jossie (Image 1)</figcaption>
+          </figure>
+          <figure>
+            <img src="results/mup_aligned.jpg" alt="mup" />
+            <figcaption>Muppynyo (Image 2)</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/jossie_aligned_mask.jpg" alt="Mask" />
+            <figcaption>Mask</figcaption>
+          </figure>
+          <figure>
+            <img src="results/merge2.jpg" alt="Jossie + Mupp" />
+            <figcaption>Blended Image</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          For my second blended image, I saw that on a submission from fall 23 a
+          student put their face on an apple, so I thought it would be fun to do
+          something similar with a strawberry. I created a mask with a cutout of
+          my eyes and mouth and the applied the same blending function to the
+          two images and mask.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/edo_aligned.jpg" alt="Edo" />
+            <figcaption>Edo (Image 1)</figcaption>
+          </figure>
+          <figure>
+            <img src="results/strawberry_aligned.jpg" alt="strawberry" />
+            <figcaption>Strawberry (Image 2)</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="results/edo_aligned_mask.jpg" alt="Mask" />
+            <figcaption>Mask</figcaption>
+          </figure>
+          <figure>
+            <img src="results/merge3.jpg" alt="Blended Image" />
+            <figcaption>Blended Image</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

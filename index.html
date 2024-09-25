@@ -1,16 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>My Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 20px;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .project-links {
+        list-style-type: none;
+        padding: 0;
+        text-align: center;
+      }
+      .project-links li {
+        margin-bottom: 15px;
+      }
+      .project-links a {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        min-width: 150px;
+      }
+      .project-links a:hover {
+        background-color: #0056b3;
       }
     </style>
   </head>
   <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <a href="./proj1/index.html">Project 1</a>
+    <div class="container">
+      <h1>My CS180 Portfolio!</h1>
+      <ul class="project-links">
+        <li><a href="./proj1/index.html">Project 1</a></li>
+        <li><a href="./proj2/index.html">Project 2</a></li>
+      </ul>
+    </div>
   </body>
 </html>
