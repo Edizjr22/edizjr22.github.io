@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 180 Project 3 - Face Morphing</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>CS 180 Project 3: Face Morphing</h1>
+      <h3>By Ediz Ertekin Jr.</h3>
+    </div>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#introduction">Introduction</a></li>
+          <li>
+            <a href="#Defining-Correspondences">Defining Correspondences</a>
+          </li>
+          <li>
+            <a href="#Mid-way-Face">Computing the "Mid-way Face</a>
+          </li>
+          <li><a href="#The-Morph-Sequence">The Morph Sequence</a></li>
+          <li><a href="#Mean-face">The "Mean face" of a population</a></li>
+          <li>
+            <a href="#Caricatures">Caricatures: Extrapolating from the mean</a>
+          </li>
+          <li>
+            <a href="#Bells-Whistles">Bells and Whistles</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <h2 id="introduction">Introduction</h2>
+        <p>
+          This project explores how to produce a "morph" animation between two
+          faces. We will also have to compute the mean of a population of faces
+          and extrapolate from a population mean to create a caricature of
+          myself. I know in the instruction is said to apply your own face to
+          someone elses however, when I saw the example picture of George
+          Clooney it made me think about how people say my dad has some
+          resemblance to him so I thought it would be fun to warp him with
+          George Clooney.
+        </p>
+
+        <h2 id="Defining-Correspondences">Part 1. Defining Correspondences</h2>
+        <p>
+          In the first part of this project I manually selected correspondences
+          points using the tool given in the instructions between the two input
+          images and used Delaunay triangulation to create a triangular mesh.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/babacim_mesh.png" alt="Babacim mesh" />
+            <figcaption>
+              Ediz Ertekin Sr. (Keypoints & Triangulation)
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/george_mesh.png" alt="George Mesh" />
+            <figcaption>George Clooney (Keypoints & Triangulation)</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="Mid-way-Face">Part 2. Computing the "Mid-way Face"</h2>
+        <p>
+          The next portion of this project involved computing the mid-way face
+          between my dad and George. After computing the key feature points and
+          triangulation, I compute the average points between the two images
+          with the equation: avg_pts = (imA_pts + imB_pts) / 2. I then compute
+          the Delauney triangulation on the average points. The next step was to
+          generate affine transformations between the average points and both my
+          dad and George. I then computed the inverse of the affine
+          transformation as recommended in our lecture slides, and then apply a
+          warping function on each image using its inverse affine matrix. The
+          last step is to average the warped images.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/babacim_aligned_2.jpg" alt="Ediz Sr." />
+            <figcaption>Ediz Ertekin (AKA Babacim)</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/baba_george.jpg" alt="Baba Clooney" />
+            <figcaption>Baba Clooney</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/george_aligned.jpg" alt="George Clooney" />
+            <figcaption>George Clooney</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="The-Morph-Sequence">Part 3. The Morph Sequence</h2>
+
+        <p>
+          For the third part of this project we had to create a morph sequence.
+          I used the same method from part 2 to generate the mid-way face with a
+          range of weights from [0,1] with 40 frames.
+        </p>
+
+        <figure>
+          <img loop src="photos/baba_clooney.gif" alt="Morph" />
+        </figure>
+
+        <h2 id="Mean-face">Part 4. The "Mean face" of a population</h2>
+        <p>
+          For the fourth part of this project, I computed the "mean face" of the
+          Danes dataset, which consisted of 37 danish people, including 7 women
+          and 30 men. This part of the project to quite a bit of time due to
+          parsing the data. I began by importing all of the file names from the
+          data folder. I then split the files into ".bmp" and ".asf" files which
+          corresponds to the photos and their key points. I then created a
+          custom parser in order to extract the (x,y) coordinate pairs for the
+          key points of each photo. In order to keep things organized, I created
+          a dictionary where each key is the path name to a photo and its value
+          is the list of key points pertaining to that photo. I then had to
+          scale the key points by the height and width of each photo. I then
+          computed the average points across all key points in the dictionary in
+          order to compute the average shape. Below are four examples of this.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/12-1f.bmp" alt="female dane" />
+            <figcaption>Example 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/avg_face_1.jpg" alt="female dane warped" />
+            <figcaption>Warped</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/05-1m.bmp" alt="male dane" />
+            <figcaption>Example 2</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/avg_face_2.jpg" alt="male dane warped" />
+            <figcaption>Warped</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/33-1m.bmp" alt="male dane" />
+            <figcaption>Example 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/avg_face_3.jpg" alt="male dane warped" />
+            <figcaption>Warped</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/40-1m.bmp" alt="male dane" />
+            <figcaption>Example 4</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/avg_face_4.jpg" alt="male dane warped" />
+            <figcaption>Warped</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          I then computed the average face of all the images in the Danes
+          dataset. Below on the left, I took the subsection of female Danes and
+          computed the average face, in the middle is the average face among the
+          whole dataset, and on the right is the average face of all the Danish
+          Men.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/dane_female.jpg" alt="Female Dane" />
+            <figcaption>Average Female Dane</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/dane_neutral.jpg" alt="Neutral Dane" />
+            <figcaption>Average Dane</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/dane_male.jpg" alt="Male Dane" />
+            <figcaption>Average Male Dane</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          Next I took the average Female Dane and warped my face in the average
+          females geometry. Overall I do not think I would look good as a Female
+          Dane. Below I am showing the aligned version of my original selfie,
+          the average female Dane. Then I applied my Geometry to the Female Dane
+          and her Geometry to myself.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/edo_aligned.jpg" alt="Selfie" />
+            <figcaption>Ediz Ertekin Jr.</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="photos/female_dane_aligned.jpg"
+              alt="female dane aligned"
+            />
+            <figcaption>Average Female Dane</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/dane_edo.jpg" alt="monster 1" />
+            <figcaption>Ediz with Female Avg Geometry</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/edo_dane.jpg" alt="monster 2" />
+            <figcaption>Female Avg with Ediz Geometry</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="Caricatures">
+          Part 5. Caricatures: Extrapolating from the mean
+        </h2>
+        <p>
+          I created caricatures of my face by extrapolating from the population
+          mean in the previous part. I achieved this by choosing alphas outside
+          the normal range of [0, 1], to exaggerate either my face's features
+          (alpha < 0) or the average face's features (alpha > 1).
+        </p>
+
+        <figure class="stack-image">
+          <img src="results/apple_g.png" alt="apple g" />
+          <figcaption>Apple Gaussian Stack</figcaption>
+        </figure>
+
+        <figure class="stack-image">
+          <img src="results/orange_g.png" alt="orange g" />
+          <figcaption>Orange Gaussian Stack</figcaption>
+        </figure>
+
+        <h2 id="Bells-Whistles">Bells and Whistles</h2>
+
+        <p></p>
+      </div>
+    </div>
+  </body>
+</html>
