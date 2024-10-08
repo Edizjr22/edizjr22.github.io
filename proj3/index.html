@@ -43,7 +43,8 @@
           someone elses however, when I saw the example picture of George
           Clooney it made me think about how people say my dad has some
           resemblance to him so I thought it would be fun to warp him with
-          George Clooney.
+          George Clooney. However, I do apply a warp to myself in the bells and
+          whistles section.
         </p>
 
         <h2 id="Defining-Correspondences">Part 1. Defining Correspondences</h2>
@@ -100,7 +101,10 @@
         <p>
           For the third part of this project we had to create a morph sequence.
           I used the same method from part 2 to generate the mid-way face with a
-          range of weights from [0,1] with 40 frames.
+          range of weights from [0,1] with 40 frames. I found a library called
+          imageio that allowed me to input a list of the morphed images to
+          generate a gif. I appended additionally frames of the final frame in
+          order to have the image persist.
         </p>
 
         <figure>
@@ -228,25 +232,71 @@
           Part 5. Caricatures: Extrapolating from the mean
         </h2>
         <p>
-          I created caricatures of my face by extrapolating from the population
-          mean in the previous part. I achieved this by choosing alphas outside
-          the normal range of [0, 1], to exaggerate either my face's features
-          (alpha < 0) or the average face's features (alpha > 1).
+          For the fifth part of this project I created caricatures of my face
+          based on the points of the average female Dane. I was able to slightly
+          alter my morph function inorder to account for an alpha variable that
+          is used to interpolate the triangles from the Delaunay computation.
+          Although in order to create the caricature I had to pick alpha
+          variables outside of the standard [0,1] range. What this means is that
+          the resulting image would either amplify my face's features (alpha =
+          1.5) or amplify the average female face's features (alpha = -0.5).
         </p>
 
-        <figure class="stack-image">
-          <img src="results/apple_g.png" alt="apple g" />
-          <figcaption>Apple Gaussian Stack</figcaption>
-        </figure>
-
-        <figure class="stack-image">
-          <img src="results/orange_g.png" alt="orange g" />
-          <figcaption>Orange Gaussian Stack</figcaption>
-        </figure>
+        <div class="image-container">
+          <figure class="stack-image">
+            <img
+              src="photos/caricature_face1.jpg"
+              alt="Caricature with alpha = -0.5"
+            />
+            <figcaption>alpha = -0.5</figcaption>
+          </figure>
+          <figure class="stack-image">
+            <img
+              src="photos/caricature_face2.jpg"
+              alt="Caricature with alpha = 1.5"
+            />
+            <figcaption>alpha = 1.5</figcaption>
+          </figure>
+        </div>
 
         <h2 id="Bells-Whistles">Bells and Whistles</h2>
 
-        <p></p>
+        <p>
+          For my bells and whistles I changed my gender of my face using a
+          average female asian face from the internet. I aligned the two images
+          and applied the various morphing transformations including applying
+          only the shape, only the appearance, and both the shape and
+          appearance.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/edo_gender_change.jpg" alt="edo aligned" />
+            <figcaption>Ediz Ertekin Jr.</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="photos/chinese_women_aligned.jpg"
+              alt="female photo aligned"
+            />
+            <figcaption>Average Chinese female</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/edo_female_geometry.jpg" alt="edo aligned" />
+            <figcaption>Ediz with Female Shape</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/edo_female_appear.jpg" alt="edo aligned" />
+            <figcaption>Ediz with Female Appearance</figcaption>
+          </figure>
+        </div>
+        <figure>
+          <img src="photos/edo_female_face.jpg" alt="female photo aligned" />
+          <figcaption>Ediz with Female Appearance and Shape</figcaption>
+        </figure>
       </div>
     </div>
   </body>
