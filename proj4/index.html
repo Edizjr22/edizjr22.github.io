@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 180 Project 4 - IMAGE WARPING and MOSAICING</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>CS 180 Project 4a: IMAGE WARPING and MOSAICING</h1>
+      <h3>By Ediz Ertekin Jr.</h3>
+    </div>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <ul>
+          <li><a href="#introduction">Introduction</a></li>
+          <li>
+            <a href="#Shoot-the-Pictures">Shoot the Pictures</a>
+          </li>
+          <li>
+            <a href="#Recover-Homographies">Recover Homographies</a>
+          </li>
+          <li><a href="#Warp-the-Images">Warp the Images</a></li>
+          <li><a href="#Image-Rectification">Image Rectification</a></li>
+          <li>
+            <a href="#Blend-into-a-mosaic">Blend the images into a mosaic</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <h2 id="introduction">Introduction</h2>
+        <p>
+          For project 4a, we explored new ways of warping images using
+          homography matrices and generating mosaics between varying frames. The
+          process of generating these images included collecting correspondence
+          points, generating homographies, and compute various warps between an
+          image and its associated homography. The last step was to create a
+          function to generate a mosaic using the warped images. I chose a
+          central image and warped the other images to the defined central
+          image.
+        </p>
+
+        <h2 id="Shoot-the-Pictures">Part 1. Shoot the Pictures</h2>
+        <p>
+          For the first part of this project I took photos from around campus. I
+          tried to fix the center of projection and rotate the camera to capture
+          the pictures of the inside of the Dwinelle courtyard, the campanile,
+          and the outside of valley of life sciences building. I hope you enjoy
+          my generated mosaics.
+        </p>
+
+        <h3>Images of the Dwinelle Courtyard:</h3>
+
+        <div class="horizontal-scroll">
+          <img src="photos/courtyard_1.jpeg" alt="court 1" />
+          <img src="photos/courtyard_2.jpeg" alt="court 2" />
+          <img src="photos/courtyard_3.jpeg" alt="court 3" />
+        </div>
+
+        <h3>Images of the Campanile:</h3>
+
+        <div class="horizontal-scroll">
+          <img src="photos/camp_3.jpeg" alt="camp 1" />
+          <img src="photos/camp_4.jpeg" alt="camp 2" />
+          <img src="photos/camp_5.jpeg" alt="camp 3" />
+        </div>
+
+        <h3>Images of the North side of VLSB:</h3>
+
+        <div class="horizontal-scroll">
+          <img src="photos/vlsb1.jpeg" alt="vlsb 1" />
+          <img src="photos/vlsb2.jpeg" alt="vlsb 2" />
+          <img src="photos/vlsb3.jpeg" alt="vlsb 3" />
+        </div>
+
+        <h2 id="Recover-Homographies">Part 2. Recover Homographies"</h2>
+        <p>
+          For most of my images I tried to pick correspondence points critical
+          points such as corners of windows or buildings. For my courtyard
+          example, I chose correspondence points based on the corners of
+          windows. I wanted to make a cool visual of the distance between
+          correspondence points of images that are stitched together. I took
+          inspiration from Alec Li's submission from last Fall and using my
+          correspondence plot function from project 3 along with a few changes
+          to generate the following visuals.
+        </p>
+
+        <h3>Example of correspondence points between two frames</h3>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/court_pts1.png" alt="correspondence points" />
+          </figure>
+          <figure>
+            <img src="photos/court_pts2.png" alt="correspondence points" />
+          </figure>
+        </div>
+
+        <figure>
+          <img src="photos/courtyard_dist1.png" alt="Correspondence points" />
+        </figure>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/court_pts3.png" alt="correspondence points" />
+          </figure>
+          <figure>
+            <img src="photos/court_pts4.png" alt="correspondence points" />
+          </figure>
+        </div>
+
+        <figure>
+          <img src="photos/courtyard_dist2.png" alt="Correspondence points" />
+        </figure>
+
+        <p>
+          In order to compute the homographies I used the correspondence points
+          I selected for the two input images. I reused the correspondence tool
+          from project 3. I then set up a linear system of n equations based on
+          the n correspondence points. After constructing the system of
+          equations and stacking them in a numpy array. I used numpy's least
+          squares operation to solve for the 8 parameters that solve the system
+          of equations and used these parameters in the homography matrix. I
+          then assign the bottom right to 1 to complete the 3x3 homography
+          matrix.
+        </p>
+
+        <figure>
+          <img src="photos/homography_math.png" alt="Math" />
+        </figure>
+
+        <h2 id="Warp-the-Images">Part 3. Warp the Images</h2>
+
+        <p>
+          For my image warp, I used the computed homography to warp an image
+          towards its corresponding reference image. For my interpolation I
+          referred to Alec Li's submission from Fall 23 and used the
+          scipy.interpolate.RegularGridInterpolator function rather than the
+          scipy.interpolate.griddata.
+          <br />
+          For the warp, I first generate the grid coordinates for the output
+          image using np.meshgrid and stacked them using np.stack. Next, I
+          applied the inverse homography transformation to map coordinates from
+          the output image back to the input image. Next I generated an input
+          grid for the interpolation function. The interpolation function I used
+          requires that the grid be regular. Then I applied the interpolation
+          function to the x & y input points. I also used extra input parameters
+          to generate the size of the resulting image. The
+          RegularGridInterpolator function has a parameter called bounds_error
+          which I set to false in order to allow coordinates to fall outside the
+          input image's boundaries but then used the fill_value=0 parameter to
+          mask these points to account for out-of-bounds coordinates.
+        </p>
+
+        <h2 id="Image-Rectification">Part 4. Image Rectification</h2>
+        <p>
+          In order to verify my homography and warping function are working I
+          took an angled picture of my computer and of a book in order to
+          rectify them. I chose the correspondence points as the four corners of
+          the original angled object and then used the same image as the second
+          image and chose the correspondence points as a larger rectangle. I
+          then computed the homography of these points and warped the image to
+          produce the rectified images below.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/computer_pts1.png" alt="correspondence points" />
+            <figcaption>Original points</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/computer_pts2.png" alt="correspondence points" />
+            <figcaption>Points selected for rectification</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/computer.jpeg" alt="computer" />
+            <figcaption>Angled Image</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/warped_computer.jpg" alt="warped computer" />
+            <figcaption>Rectified</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/book_pts1.png" alt="correspondence points" />
+            <figcaption>Original points</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/book_pts2.png" alt="correspondence points" />
+            <figcaption>Points selected for rectification</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/book.jpeg" alt="book" />
+            <figcaption>Angled Image</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/warped_book.jpg" alt="warped book" />
+            <figcaption>Rectified</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="Blend-into-a-mosaic">Part 5. Blend the images into a mosaic</h2>
+
+        <p>
+          For my image mosaic, I used the computed homographies to warp each of
+          the images in a list to a common projection. I first computed the size
+          of the final output mosaic by calculating the bounding box using the
+          transformed corners of each image using their corresponding
+          homography. My next step was to compute a translation matrix to shift
+          images into the mosaic frame. I selected one image as the central
+          image and left it unwarped and warp the other images into its
+          projection with their homographies. I used a weighted average to
+          prevent strong edge artifacts.
+          <br />
+          For blending, I created a binary mask for each warped image to
+          identify which pixels are valid. Next using a hint from ed about
+          cv2.distanceTransform I computed a blending mask using a distance
+          transform. This is useful because it is assigns higher weights to
+          pixels near the image center, and gradually decreases the weight
+          toward the edges. Once all images are added, I normalize the mosaic by
+          dividing the accumulated pixel values by the total weights. My last
+          step was to set unused areas of the mosaic canvas to 0 to avoid any
+          visual issues.
+        </p>
+
+        <h3>Two image mosaics</h3>
+        <p>
+          I assigned the first image to the identity and the second to a
+          homography from the second to the first.
+        </p>
+
+        <figure>
+          <img src="photos/courtyard_pano_1.jpg" alt="pano 1" />
+        </figure>
+
+        <figure>
+          <img src="photos/vlsb_pano_1.jpg" alt="pano 2" />
+        </figure>
+
+        <h3>Three image mosaics</h3>
+        <p>
+          I assigned the second image as the central image and associated it
+          with the identity matrix as its homography so that it wouldnt be
+          warped. I then computed the homography to project the first image onto
+          the central and project the third image onto the central.
+        </p>
+
+        <figure>
+          <img src="photos/courtyard_pano_2.jpg" alt="pano 3" />
+        </figure>
+
+        <figure>
+          <img src="photos/vlsb_pano_2.jpg" alt="pano 4" />
+        </figure>
+
+        <figure>
+          <img src="photos/campanile_pano.jpg" alt="pano 5" />
+        </figure>
+      </div>
+    </div>
+  </body>
+</html>
