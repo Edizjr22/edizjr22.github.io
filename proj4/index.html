@@ -229,9 +229,9 @@
           transform. This is useful because it is assigns higher weights to
           pixels near the image center, and gradually decreases the weight
           toward the edges. Once all images are added, I normalize the mosaic by
-          dividing the accumulated pixel values by the total weights. My last
-          step was to set unused areas of the mosaic canvas to 0 to avoid any
-          visual issues.
+          dividing the accumulated pixel values by the total weights. Lastly, I
+          divide my mosaic by the weights > 0 to ensure RGB values are between 0
+          and 1. This completes the smooth blending between the warped images.
         </p>
 
         <h3>Two image mosaics</h3>
