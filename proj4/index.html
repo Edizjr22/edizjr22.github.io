@@ -232,6 +232,7 @@
           dividing the accumulated pixel values by the total weights. Lastly, I
           divide my mosaic by the weights > 0 to ensure RGB values are between 0
           and 1. This completes the smooth blending between the warped images.
+          Below I have attached each mosaic and its associated blend mask.
         </p>
 
         <h3>Two image mosaics</h3>
@@ -240,13 +241,27 @@
           homography from the second to the first.
         </p>
 
-        <figure>
-          <img src="photos/courtyard_pano_1.jpg" alt="pano 1" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/courtyard_pano_1.jpg" alt="pano 1" />
+            <figcaption>Couryard Pano 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/courtyard_pano_blend_1.png" alt="pano 1 blend" />
+            <figcaption>Couryard Pano 1 Blend</figcaption>
+          </figure>
+        </div>
 
-        <figure>
-          <img src="photos/vlsb_pano_1.jpg" alt="pano 2" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/vlsb_pano_1.jpg" alt="pano 2" />
+            <figcaption>VLSB Pano 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/vlsb_pano_blend_1.png" alt="pano 2 blend" />
+            <figcaption>VLSB Pano 1 Blend</figcaption>
+          </figure>
+        </div>
 
         <h3>Three image mosaics</h3>
         <p>
@@ -256,17 +271,38 @@
           the central and project the third image onto the central.
         </p>
 
-        <figure>
-          <img src="photos/courtyard_pano_2.jpg" alt="pano 3" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/courtyard_pano_2.jpg" alt="pano 3" />
+            <figcaption>Couryard Pano 2</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/courtyard_pano_blend_2.png" alt="pano 3 blend" />
+            <figcaption>Couryard Pano 2 Blend</figcaption>
+          </figure>
+        </div>
 
-        <figure>
-          <img src="photos/vlsb_pano_2.jpg" alt="pano 4" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/vlsb_pano_2.jpg" alt="pano 4" />
+            <figcaption>VLSB Pano 2</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/vlsb_pano_blend_2.png" alt="pano 4 blend" />
+            <figcaption>VLSB Pano 2 Blend</figcaption>
+          </figure>
+        </div>
 
-        <figure>
-          <img src="photos/campanile_pano.jpg" alt="pano 5" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/campanile_pano.jpg" alt="pano 5" />
+            <figcaption>Campanile Pano</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/campanile_pano_blend.png" alt="pano 5 blend" />
+            <figcaption>Campanile Pano Blend</figcaption>
+          </figure>
+        </div>
       </div>
     </div>
   </body>
