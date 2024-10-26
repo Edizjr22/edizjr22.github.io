@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CS 180 Project 4 - IMAGE WARPING and MOSAICING</title>
+    <title>CS 180 Project 4 - [Auto]Stitching Photo Mosaics</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="header">
-      <h1>CS 180 Project 4a: IMAGE WARPING and MOSAICING</h1>
+      <h1>CS 180 Project 4: [Auto]Stitching Photo Mosaics</h1>
       <h3>By Ediz Ertekin Jr.</h3>
     </div>
 
     <div class="main-container">
       <div class="sidebar">
         <ul>
+          <li><strong>Part A</strong></li>
           <li><a href="#introduction">Introduction</a></li>
           <li>
             <a href="#Shoot-the-Pictures">Shoot the Pictures</a>
@@ -27,10 +28,29 @@
           <li>
             <a href="#Blend-into-a-mosaic">Blend the images into a mosaic</a>
           </li>
+          <li><strong>Part B</strong></li>
+          <li><a href="#part-b-introduction">Introduction</a></li>
+          <li>
+            <a href="#Detecting-Corner-Features">Detecting Corner Features</a>
+          </li>
+          <li>
+            <a href="#Defining-Feature-Descriptor"
+              >Defining Feature Descriptor</a
+            >
+          </li>
+          <li>
+            <a href="#Matching-Feature-Descriptors"
+              >Matching Feature Descriptors</a
+            >
+          </li>
+          <li><a href="#RANSAC-Homography">RANSAC Homography</a></li>
+          <li><a href="#Mosaic-2.0">Mosaic 2.0</a></li>
+          <li><a href="#Reflection">Reflection</a></li>
         </ul>
       </div>
 
       <div class="content">
+        <h1>Part A: IMAGE WARPING and MOSAICING</h1>
         <h2 id="introduction">Introduction</h2>
         <p>
           For project 4a, we explored new ways of warping images using
@@ -99,9 +119,11 @@
           </figure>
         </div>
 
-        <figure>
-          <img src="photos/courtyard_dist1.png" alt="Correspondence points" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/courtyard_dist1.png" alt="Correspondence points" />
+          </figure>
+        </div>
 
         <div class="image-container">
           <figure>
@@ -112,9 +134,11 @@
           </figure>
         </div>
 
-        <figure>
-          <img src="photos/courtyard_dist2.png" alt="Correspondence points" />
-        </figure>
+        <div class="image-container">
+          <figure>
+            <img src="photos/courtyard_dist2.png" alt="Correspondence points" />
+          </figure>
+        </div>
 
         <p>
           In order to compute the homographies I used the correspondence points
@@ -295,16 +319,10 @@
 
         <h3>Example 3</h3>
 
-        <div class="image-container">
-          <figure>
-            <img src="photos/courtyard_1.jpeg" alt="intro image" />
-          </figure>
-          <figure>
-            <img src="photos/courtyard_2.jpeg" alt="intro image" />
-          </figure>
-          <figure>
-            <img src="photos/courtyard_3.jpeg" alt="intro image" />
-          </figure>
+        <div class="horizontal-scroll">
+          <img src="photos/courtyard_1.jpeg" alt="court 1" />
+          <img src="photos/courtyard_2.jpeg" alt="court 2" />
+          <img src="photos/courtyard_3.jpeg" alt="court 3" />
         </div>
 
         <div class="image-container">
@@ -320,16 +338,10 @@
 
         <h3>Example 4</h3>
 
-        <div class="image-container">
-          <figure>
-            <img src="photos/vlsb1.jpeg" alt="intro image" />
-          </figure>
-          <figure>
-            <img src="photos/vlsb2.jpeg" alt="cintro image" />
-          </figure>
-          <figure>
-            <img src="photos/vlsb3.jpeg" alt="intro image" />
-          </figure>
+        <div class="horizontal-scroll">
+          <img src="photos/vlsb1.jpeg" alt="vlsb 1" />
+          <img src="photos/vlsb2.jpeg" alt="vlsb 2" />
+          <img src="photos/vlsb3.jpeg" alt="vlsb 3" />
         </div>
 
         <div class="image-container">
@@ -345,16 +357,10 @@
 
         <h3>Example 5</h3>
 
-        <div class="image-container">
-          <figure>
-            <img src="photos/camp_3.jpeg" alt="intro image" />
-          </figure>
-          <figure>
-            <img src="photos/camp_4.jpeg" alt="intro image" />
-          </figure>
-          <figure>
-            <img src="photos/camp_5.jpeg" alt="intro image" />
-          </figure>
+        <div class="horizontal-scroll">
+          <img src="photos/camp_3.jpeg" alt="camp 1" />
+          <img src="photos/camp_4.jpeg" alt="camp 2" />
+          <img src="photos/camp_5.jpeg" alt="camp 3" />
         </div>
 
         <div class="image-container">
@@ -367,6 +373,164 @@
             <figcaption>Campanile Pano Blend</figcaption>
           </figure>
         </div>
+
+        <hr />
+
+        <h1>Part B: FEATURE MATCHING for AUTOSTITCHING</h1>
+        <h2 id="part-b-introduction">Introduction</h2>
+        <p>
+          For project 4b, we create a system for automatically stitching images
+          into a mosaic. We do this by implementing the steps given in the paper
+          "Multi-Image Matching using Multi-Scale Oriented Patches" by, Matthew
+          Brown, Richard Szeliski, and Simon Winder. They explored a new way of
+          image matching unlike previous methods that relied on either direct
+          matching or feature-based, and rather combined these two results in
+          invariant features. The four parts of the paper that are relevant to
+          us include first computing single scale Harris corners to define
+          interest points, although the paper does use multi-scale. Followed by,
+          creating an adaptive non-maximal suppression filter to filter our
+          interest points. Once we have filtered the interest points we can
+          generate feature descriptor for each feature points and match them
+          between two images. Once we compute the points associated with the
+          matched features we can compute a homography using RANSAC. The final
+          step is to compute the mosaic similar to part 4a using the new
+          homography that we have generated.
+        </p>
+
+        <h2 id="Detecting-Corner-Features">Detecting Corner Features</h2>
+        <p>
+          Given that in the instructions we only have to compute Harris Interest
+          points on a single scale, I used the given starter code function from
+          harris.py. Below are two examples of this function in action.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photosb/harris_corners_1.png" alt="harris image 1" />
+          </figure>
+          <figure>
+            <img src="photosb/harris_corners_2.png" alt="harris image 2" />
+          </figure>
+        </div>
+
+        <h2 id="Defining-Feature-Descriptor">Defining Feature Descriptor</h2>
+        <p>
+          In order to generate the feature descriptors I first created a
+          function to apply adaptive non-maximal suppression or ANMS for short.
+          This function helps to filter the interest points by reducing
+          redundant information while retaining the distribution across the
+          image. Below is an example of the AMNS interest point filtering from
+          the first two example images.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photosb/amns_ex_1.png" alt="amns image 1" />
+          </figure>
+          <figure>
+            <img src="photosb/amns_ex_2.png" alt="amns image 2" />
+          </figure>
+        </div>
+
+        <p>
+          Once I filter my interest points, I then extract the features through
+          sampling patches of size 8x8 from a larger 40x40 window to ensure
+          blurred descriptor's and then I normalize them for the bias/gain. From
+          the paper I also ensure a spacing of s = 5 pixels between sample
+          patches. I selected 64 random patches to display below.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photosb/feature_ex.png" alt="features" />
+          </figure>
+        </div>
+
+        <h2 id="Matching-Feature-Descriptors">Matching Feature Descriptors</h2>
+        <p>
+          After computing the features for each image, we need to find pairs of
+          features that look similar and are thus likely to be good matches. I
+          matched features between two sets of descriptors using the Lowe's
+          ratio test with various thresholds and found that if the threshold was
+          too low such as 0.1 it would produce a very blurred image. However, if
+          the threshold was set higher to 0.8, it produced a much nicer mosaic
+          with less blur. Below I will attach an image of feature matching on
+          the ANMS points with a threshold of 0.8.
+        </p>
+
+        <figure>
+          <img
+            src="photosb/feature_matching_1.png"
+            alt="features"
+            style="width: 80%; height: auto"
+          />
+          <figcaption>Threshold = 0.2</figcaption>
+        </figure>
+
+        <figure>
+          <img
+            src="photosb/feature_matching_2.png"
+            alt="features"
+            style="width: 80%; height: auto"
+          />
+          <figcaption>Threshold = 0.9</figcaption>
+        </figure>
+
+        <h2 id="RANSAC-Homography">RANSAC Homography</h2>
+        <p>
+          In order to compute the homography we can use 4-point RANSAC. In this
+          algorithm we randomly sample 4 pairs of points, and compute the
+          homography through these points. We then store the inliers for each
+          computed homography in a list. After we iterate through the points, we
+          keep the homography that produces the most inliers. The goal is to
+          find the majority transformation and remove all others that do not
+          follow.
+        </p>
+
+        <h2 id="Mosaic-2.0">Mosaic 2.0</h2>
+        <p>
+          After we compute the homography using the RANSAC algorithm, we can use
+          the same image warp and mosaicing function from part A to produce the
+          final mosaic and compare with the manual correspondence points
+          approach. Below I will attach the 4a results along with the newly
+          computed mosaics.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/courtyard_pano_2.jpg" alt="pano 1 manual" />
+            <figcaption>Mosaic with manual point</figcaption>
+          </figure>
+          <figure>
+            <img src="photosb/final_mosaic_2.jpg" alt="pano 1 auto" />
+            <figcaption>Mosaic with auto points</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/vlsb_pano_2.jpg" alt="pano 2 manual" />
+            <figcaption>Mosaic with manual points</figcaption>
+          </figure>
+          <figure>
+            <img src="photosb/final_mosaic_1.jpg" alt="pano 2 auto" />
+            <figcaption>Mosaic with auto points</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/campanile_pano.jpg" alt="pano 3 manual" />
+            <figcaption>Mosaic with manual point</figcaption>
+          </figure>
+          <figure>
+            <img src="photosb/final_mosaic_3.jpg" alt="pano 3 auto" />
+            <figcaption>Mosaic with auto points</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="Reflection">Reflection</h2>
+        <p>This was a great project! (NEED TO COMPLETE)</p>
       </div>
     </div>
   </body>
