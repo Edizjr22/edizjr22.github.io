@@ -96,7 +96,7 @@
           <img src="photos/vlsb3.jpeg" alt="vlsb 3" />
         </div>
 
-        <h2 id="Recover-Homographies">Part 2. Recover Homographies"</h2>
+        <h2 id="Recover-Homographies">Part 2. Recover Homographies</h2>
         <p>
           For most of my images I tried to pick correspondence points critical
           points such as corners of windows or buildings. For my courtyard
@@ -452,10 +452,10 @@
           features that look similar and are thus likely to be good matches. I
           matched features between two sets of descriptors using the Lowe's
           ratio test with various thresholds and found that if the threshold was
-          too low such as 0.1 it would produce a very blurred image. However, if
-          the threshold was set higher to 0.8, it produced a much nicer mosaic
+          too low such as 0.2 it would produce a very blurred image. However, if
+          the threshold was set higher to 0.9, it produced a much nicer mosaic
           with less blur. Below I will attach an image of feature matching on
-          the ANMS points with a threshold of 0.8.
+          the ANMS points with a threshold of 0.2 and 0.9.
         </p>
 
         <figure>
@@ -478,13 +478,12 @@
 
         <h2 id="RANSAC-Homography">RANSAC Homography</h2>
         <p>
-          In order to compute the homography we can use 4-point RANSAC. In this
-          algorithm we randomly sample 4 pairs of points, and compute the
-          homography through these points. We then store the inliers for each
-          computed homography in a list. After we iterate through the points, we
-          keep the homography that produces the most inliers. The goal is to
-          find the majority transformation and remove all others that do not
-          follow.
+          In order to compute the homography I used the 4-point RANSAC algorithm
+          discussed in lecture. In this algorithm I randomly sample 4 pairs of
+          points, and compute the homography for these points. I then store the
+          inliers for each computed homography in a list. After I iterate
+          through the points, I keep the homography that produces the most
+          inliers. The goal is to find the majority transformation.
         </p>
 
         <h2 id="Mosaic-2.0">Mosaic 2.0</h2>
@@ -530,7 +529,19 @@
         </div>
 
         <h2 id="Reflection">Reflection</h2>
-        <p>This was a great project! (NEED TO COMPLETE)</p>
+        <p>
+          I really enjoyed working on this project and learning how to read and
+          implement a research paper. I think my favorite part was figuring out
+          how to compute the mosaic. From part A, I think the coolest part was
+          computing the rectified images. I hand selected the corners and
+          appropriate output grid and then to validate my warp function applied
+          the warp to the computer and book image with their corresponding
+          homographies. I also enjoyed the linear algebra applications with the
+          homographies and solving the system of linear equations. From part B,
+          I enjoyed reading the research paper, and translating the steps into
+          my code. I think it is a great skill to practice and I plan to try it
+          more it in the future.
+        </p>
       </div>
     </div>
   </body>
