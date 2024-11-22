@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 180 Project 5 - Fun With Diffusion Models!</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>CS 180 Project 5: Fun With Diffusion Models!</h1>
+      <h3>By Ediz Ertekin Jr.</h3>
+    </div>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <ul>
+          <li><strong>Part A</strong></li>
+          <li><a href="#introduction">Introduction</a></li>
+          <li><strong>Part 1: Sampling Loops</strong></li>
+          <li>
+            <a href="#forward-process">Implementing the Forward Process</a>
+          </li>
+          <li>
+            <a href="#Classical-Denoising">Classical Denoising</a>
+          </li>
+          <li><a href="#One-Step-Denoising">One-Step Denoising</a></li>
+          <li><a href="#Iterative-Denoising">Iterative Denoising</a></li>
+          <li>
+            <a href="#Diffusion-Model-Sampling">Diffusion Model Sampling</a>
+          </li>
+          <li>
+            <a href="#CFG">Classifier-Free Guidance (CFG)</a>
+          </li>
+          <li>
+            <a href="#Image-to-image-Translation">Image-to-image Translation</a>
+          </li>
+          <li>
+            <a href="#Hand-Drawn">Editing Hand-Drawn and Web Images</a>
+          </li>
+          <li>
+            <a href="#Inpainting">Inpainting</a>
+          </li>
+          <li>
+            <a href="#Text-Conditional-Image-to-image-Translation"
+              >Text-Conditional Image-to-image Translation</a
+            >
+          </li>
+          <li>
+            <a href="#Visual-Anagrams">Visual Anagrams</a>
+          </li>
+          <li>
+            <a href="#Hybrid-Images">Hybrid Images</a>
+          </li>
+          <li><strong>Part B</strong></li>
+          <li><a href="#part-b-introduction">Introduction</a></li>
+          <li>
+            <strong>Part 1: Training a Single-Step Denoising UNet</strong>
+          </li>
+          <li>
+            <a href="#Implementing-the-UNet">Implementing the UNet</a>
+          </li>
+          <li>
+            <a href="#Train-a-Denoiser">Using the UNet to Train a Denoiser</a>
+          </li>
+          <li>
+            <a href="#Training">Training</a>
+          </li>
+          <li><a href="#Testing">Out-of-Distribution Testing</a></li>
+
+          <strong>Part 2: Training a Diffusion Model</strong>
+
+          <li><a href="#Adding-time">Adding Time Conditioning to UNet</a></li>
+          <li><a href="#Traing_2">Training the UNet</a></li>
+          <li><a href="#Sampling_2">Sampling from the UNet</a></li>
+          <li><a href="#Training_3">Adding Class-Conditioning to UNet</a></li>
+          <li>
+            <a href="#Sampling_3">Sampling from the Class-Conditioned UNet</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <h1>Part A: The Power of Diffusion Models!</h1>
+        <h2 id="introduction">Introduction</h2>
+        <p>
+          For project 5a, I opportunity to explore applying noise to images as
+          well as various methods of denoising. I then got then worked with
+          diffusion models to generate samples from a given image as well as a
+          blank noisy canvas. Next I looked into Image-to-image translation for
+          web images as well as hand drawn images. After that I applied
+          inpainting to images given a mask. Finally, I explored visual anagrams
+          and hybrid images.
+        </p>
+
+        <h2>Part 0. Setup</h2>
+        <p>
+          In part 0, I downloaded a DeepFloyd as well as text embeddings.
+          DeepFloyd is a two stage model trained by Stability AI. Below are a
+          few results with differing numbers of iteratives steps which as a
+          result alter the sample output.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/Before_image_20_7_0.jpg" alt="vill" />
+            <figcaption>
+              "An oil painting of a snowy village" <br />
+              20 iterations
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/Before_image_20_7_1.jpg" alt="Guy" />
+            <figcaption>
+              "A man wearing a hat" <br />
+              20 iterations
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/Before_image_20_7_2.jpg" alt="rocket" />
+            <figcaption>
+              "A rocket ship" <br />
+              20 iterations
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/After_image_40_7_0.jpg" alt="vill" />
+            <figcaption>
+              "An oil painting of a snowy village" <br />
+              40 iterations
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/After_image_40_7_1.jpg" alt="Guy" />
+            <figcaption>
+              "A man wearing a hat" <br />
+              40 iterations
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/After_image_40_7_2.jpg" alt="rocket" />
+            <figcaption>
+              "A rocket ship" <br />
+              40 iterations
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/image_200_7_0.jpg" alt="vill" />
+            <figcaption>
+              "An oil painting of a snowy village" <br />
+              200 iterations
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/image_200_7_1.jpg" alt="Guy" />
+            <figcaption>
+              "A man wearing a hat" <br />
+              200 iterations
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="photos/image_200_7_2.jpg" alt="rocket" />
+            <figcaption>
+              "A rocket ship" <br />
+              200 iterations
+            </figcaption>
+          </figure>
+        </div>
+
+        <h2>Part 1. Sampling Loops</h2>
+        <p>
+          In this part I wrote my own "sampling loops" that use the pretrained
+          DeepFloyd denoisers. First I implemented the forward process which
+          applied noise to the image. I then implemented various methods of
+          denoising such as classical denoising, one-step denoising, and
+          iterative.
+        </p>
+
+        <h3 id="forward-process">1.1 Implementing the Forward Process</h3>
+        <p>
+          Below I generate a noisy image at timestep t (250,500,750) by sampling
+          from a Gaussian.
+        </p>
+        <div class="image-container">
+          <figure>
+            <img src="photos/campanile.jpg" alt="original" />
+            <figcaption>Original Campanile</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_250.jpg" alt="t1" />
+            <figcaption>Noisy Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_500.jpg" alt="t2" />
+            <figcaption>Noisy Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_750.jpg" alt="t3" />
+            <figcaption>Noisy Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Classical-Denoising">1.2 Classical Denoising</h3>
+        <p>
+          Next I applied a Gaussian blur filtering to try to remove the noise
+          from the image. However, the results are not great.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/noisy_image_t_250.jpg" alt="t1" />
+            <figcaption>Noisy Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_500.jpg" alt="t2" />
+            <figcaption>Noisy Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_750.jpg" alt="t3" />
+            <figcaption>Noisy Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/blur_image_t_250.jpg" alt="t1" />
+            <figcaption>Gaussian Blur Denoising at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/blur_image_t_500.jpg" alt="t2" />
+            <figcaption>Gaussian Blur Denoising at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/blur_image_t_750.jpg" alt="t3" />
+            <figcaption>Gaussian Blur Denoising at t = 750</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="One-Step-Denoising">1.3 One-Step Denoising</h3>
+        <p>
+          For this part I use the pretrained diffusion model to denoise the
+          noisy images computed in 1.1. I estimate the noise in the new noisy
+          image and then denoise it using the diffusion model to obtain an
+          estimate of the original image.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/noisy_image_t_250.jpg" alt="t1" />
+            <figcaption>Noisy Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_500.jpg" alt="t2" />
+            <figcaption>Noisy Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/noisy_image_t_750.jpg" alt="t3" />
+            <figcaption>Noisy Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/one_step_denoise_image_t_250.jpg" alt="t1" />
+            <figcaption>One-Step Denoised Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/one_step_denoise_image_t_500.jpg" alt="t2" />
+            <figcaption>One-Step Denoised Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/one_step_denoise_image_t_750.jpg" alt="t3" />
+            <figcaption>One-Step Denoised Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Iterative-Denoising">1.4 Iterative Denoising</h3>
+        <p>
+          Although the one-step denoising does a decent job for denoising.
+          However, diffusion models are meant to denoise iteratively, but we
+          dont want it to be slow so we can skip steps to denoise faster. To
+          skip steps I created a new list of timesteps called strided_timesteps.
+          I then denoise the image at each timestep in strided_timesteps using
+          the model. Below are the results from every fifth timesteps in
+          strided_timesteps. As well as the final clean image, the original
+          campanile, one-step, and the gaussian blur denoised images.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos/iterative_denoised_timestep_90.jpg" alt="t1" />
+            <figcaption>Noisy Campanile at t=90</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/iterative_denoised_timestep_240.jpg" alt="t2" />
+            <figcaption>Noisy Campanile at t=240</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/iterative_denoised_timestep_390.jpg" alt="t3" />
+            <figcaption>Noisy Campanile at t=390</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/iterative_denoised_timestep_540.jpg" alt="t4" />
+            <figcaption>Noisy Campanile at t=540</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/iterative_denoised_timestep_690.jpg" alt="t5" />
+            <figcaption>Noisy Campanile at t=690</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/campanile.jpg" alt="t1" />
+            <figcaption>Original</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/iterative_denoised_final.jpg" alt="t2" />
+            <figcaption>Iteratively Denoised Campanile</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/one_step_denoise_image_t_250.jpg" alt="t3" />
+            <figcaption>One-Step Denoised Campanile</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/blur_image_t_750.jpg" alt="t4" />
+            <figcaption>Gaussian Blurred Campanile</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Diffusion-Model-Sampling">1.5 Diffusion Model Sampling</h3>
+        <p>
+          Next we use the diffusion model to create images from scratch by
+          passing in a blank canvas with the prompt "a high quality photo" for
+          the embeddings.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos/generated_sample_0.jpg" alt="t1" />
+            <figcaption>Sample 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/generated_sample_1.jpg" alt="t2" />
+            <figcaption>Sample 2</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/generated_sample_2.jpg" alt="t3" />
+            <figcaption>Sample 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/generated_sample_3.jpg" alt="t4" />
+            <figcaption>Sample 4</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/generated_sample_4.jpg" alt="t5" />
+            <figcaption>Sample 5</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="CFG">1.6 Classifier-Free Guidance (CFG)</h3>
+        <p>
+          From section 1.5, we can see that some of the images in the prior
+          section are not very good, and some are completely non-sensical. In
+          order to improve these results we can use classifier-free guidance. I
+          computed a conditional and an unconditional noise estimate to generate
+          a new estimate using a variable that controls the strength of CFG. For
+          the conditional prompt I used "a high quality photo" and for the
+          unconditional prompt I used "". Below are 5 images using the prompt "a
+          high quality photo" with a CFG scale of 7.
+        </p>
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos/CFG_Sample_0.jpg" alt="t1" />
+            <figcaption>Sample 1 with CFG</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/CFG_Sample_1.jpg" alt="t2" />
+            <figcaption>Sample 2 with CFG</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/CFG_Sample_2.jpg" alt="t3" />
+            <figcaption>Sample 3 with CFG</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/CFG_Sample_3.jpg" alt="t4" />
+            <figcaption>Sample 4 with CFG</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/CFG_Sample_4.jpg" alt="t5" />
+            <figcaption>Sample 5 with CFG</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Image-to-image-Translation">1.7 Image-to-image Translation</h3>
+        <p>
+          The more noise we add, the larger the edit will be however this
+          results in the model needing to hallucinate. I took the original test
+          image, applied the noise function to it, and force it back onto the
+          image manifold without any conditioning. Below I applied this
+          translation to the image of the campanile as well as two images of my
+          own.
+        </p>
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos2/cleaned_image_noise_1.jpg" alt="t1" />
+            <figcaption>i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/cleaned_image_noise_3.jpg" alt="t2" />
+            <figcaption>i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/cleaned_image_noise_5.jpg" alt="t3" />
+            <figcaption>i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/cleaned_image_noise_7.jpg" alt="t4" />
+            <figcaption>i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/cleaned_image_noise_10.jpg" alt="t5" />
+            <figcaption>i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/cleaned_image_noise_20.jpg" alt="t6" />
+            <figcaption>i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/campanile.jpg" alt="t7" />
+            <figcaption>Campanile</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos2/beanie_boy_1.jpg" alt="t1" />
+            <figcaption>i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/beanie_boy_3.jpg" alt="t2" />
+            <figcaption>i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/beanie_boy_5.jpg" alt="t3" />
+            <figcaption>i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/beanie_boy_7.jpg" alt="t4" />
+            <figcaption>i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/beanie_boy_10.jpg" alt="t5" />
+            <figcaption>i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/beanie_boy_20.jpg" alt="t6" />
+            <figcaption>i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/Beanie_Boy.jpg" alt="t7" />
+            <figcaption>Beanie Boy</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos2/bubble_guy_1.jpg" alt="t1" />
+            <figcaption>i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/bubble_guy_3.jpg" alt="t2" />
+            <figcaption>i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/bubble_guy_5.jpg" alt="t3" />
+            <figcaption>i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/bubble_guy_7.jpg" alt="t4" />
+            <figcaption>i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/bubble_guy_10.jpg" alt="t5" />
+            <figcaption>i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/bubble_guy_20.jpg" alt="t6" />
+            <figcaption>i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/Bubble_Skater.jpg" alt="t7" />
+            <figcaption>Bubble Skater</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Hand-Drawn">1.7.1 Editing Hand-Drawn and Web Images</h3>
+        <p>
+          Next I apply the above function to hand drawn images as well as a
+          image from the web of a porsche. The first image is of an avocado,
+          then I drew a flower and a ball guy with glasses.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos2/avo_evo_1.jpg" alt="t1" />
+            <figcaption>i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/avo_evo_3.jpg" alt="t2" />
+            <figcaption>i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/avo_evo_5.jpg" alt="t3" />
+            <figcaption>i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/avo_evo_7.jpg" alt="t4" />
+            <figcaption>i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/avo_evo_10.jpg" alt="t5" />
+            <figcaption>i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/avo_evo_20.jpg" alt="t6" />
+            <figcaption>i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/avocado.jpg" alt="t7" />
+            <figcaption>Avocado</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos2/flower_1.jpg" alt="t1" />
+            <figcaption>i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/flower_3.jpg" alt="t2" />
+            <figcaption>i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/flower_5.jpg" alt="t3" />
+            <figcaption>i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/flower_7.jpg" alt="t4" />
+            <figcaption>i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/flower_10.jpg" alt="t5" />
+            <figcaption>i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/flower_20.jpg" alt="t6" />
+            <figcaption>i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/flower.jpg" alt="t7" />
+            <figcaption>Drawn Flower</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos2/ball_guy_1.jpg" alt="t1" />
+            <figcaption>i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/ball_guy_3.jpg" alt="t2" />
+            <figcaption>i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/ball_guy_5.jpg" alt="t3" />
+            <figcaption>i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/ball_guy_7.jpg" alt="t4" />
+            <figcaption>i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/ball_guy_10.jpg" alt="t5" />
+            <figcaption>i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/ball_guy_20.jpg" alt="t6" />
+            <figcaption>i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos2/ball_guy.jpg" alt="t7" />
+            <figcaption>Drawn Ball Guy</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Inpainting">1.7.2 Inpainting</h3>
+        <p>
+          Next I applied this function to inpaint an image. This means I took an
+          image, along with a mask, which is used to show what part of the image
+          can be replaced/altered. Then I apply the same function as above to
+          the image while retaining the image outside of the mask. Below are a
+          few examples, the first is changing the top of the campanile, the
+          second is changing the hat of a cartoon boy, and the third is
+          replacing the porsche with a soccer ball. For the first 2 I used the
+          prompt "a high quality image" and for the last I used "a soccer ball"
+          just to try something different.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos/campanile.jpg" alt="t5" />
+            <figcaption>Original</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/camp_mask.jpg" alt="t6" />
+            <figcaption>Mask</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/camp_replace.jpg" alt="t7" />
+            <figcaption>Hole to fill</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/camp_replaced.jpg" alt="t7" />
+            <figcaption>Campanile Inpainted</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos3/beanie_boy.jpeg" alt="t5" />
+            <figcaption>Original</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/beanie_mask.jpeg" alt="t6" />
+            <figcaption>Mask</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/change_hat.jpg" alt="t6" />
+            <figcaption>Hole to fill</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/beanie_boy_2.jpg" alt="t7" />
+            <figcaption>Beanie Boy Inpainted</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos3/porsche.jpg" alt="t5" />
+            <figcaption>Porsche</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/porsche_mask.jpg" alt="t6" />
+            <figcaption>Mask</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/change_car.jpg" alt="t6" />
+            <figcaption>Hole to fill</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/car_to_ball.jpg" alt="t7" />
+            <figcaption>Porsche Inpainted with Soccer Ball Prompt</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Text-Conditional-Image-to-image-Translation">
+          1.7.3 Text-Conditional Image-to-image Translation
+        </h3>
+        <p>
+          Next I use the same function as above but I guide the projection with
+          a text prompt. I used the prompt "a rocket ship" on various images. I
+          inputted a picture of the iron giant in an attempt to create ironman
+          as well as a picture of a car to create a rocket car. Below are my
+          results.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos3/rocket_1.jpg" alt="t5" />
+            <figcaption>Rocket Ship at noise level 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/rocket_3.jpg" alt="t6" />
+            <figcaption>Rocket Ship at noise level 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/rocket_5.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/rocket_7.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/rocket_10.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/rocket_20.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos/campanile.jpg" alt="t7" />
+            <figcaption>Campanile</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos3/ironman_1.jpg" alt="t5" />
+            <figcaption>Rocket Ship at noise level 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/ironman_3.jpg" alt="t6" />
+            <figcaption>Rocket Ship at noise level 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/ironman_5.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/ironman_7.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/ironman_10.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/ironman_20.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/iron_giant.jpg" alt="t7" />
+            <figcaption>Iron Giant</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="photos3/car_1.jpg" alt="t5" />
+            <figcaption>Rocket Ship at noise level 1</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/car_3.jpg" alt="t6" />
+            <figcaption>Rocket Ship at noise level 3</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/car_5.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 5</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/car_7.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 7</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/car_10.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 10</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/car_20.jpg" alt="t7" />
+            <figcaption>Rocket Ship at noise level 20</figcaption>
+          </figure>
+          <figure>
+            <img src="photos3/porsche.jpg" alt="t7" />
+            <figcaption>Porsche</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Visual-Anagrams">1.8 Visual Anagrams</h3>
+        <p>
+          Next I applied this functionality to create visual anagrams. In order
+          to do this we pass in two prompts and apply the above functionality
+          with prompt 1 on the original image and then flip the image and apply
+          prompt 2 to it. I then average the two noise estimates to create a new
+          image. Below are a few examples of this and I will attach the prompts
+          as well.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos4/old_guy.jpg" alt="t5" />
+            <figcaption>"an oil painting of an old man"</figcaption>
+          </figure>
+          <figure>
+            <img src="photos4/campfire.jpg" alt="t6" />
+            <figcaption>
+              "an oil painting of people around a campfire"
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos4/guy.jpg" alt="t6" />
+            <figcaption>"a photo of a man"</figcaption>
+          </figure>
+          <figure>
+            <img src="photos4/amalfi_coast.jpg" alt="t5" />
+            <figcaption>"a photo of the amalfi coast"</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos4/dog.jpg" alt="t5" />
+            <figcaption>"an oil painting of a dog"</figcaption>
+          </figure>
+          <figure>
+            <img src="photos4/snowboarder.jpg" alt="t6" />
+            <figcaption>"an oil painting of a snowboarder"</figcaption>
+          </figure>
+        </div>
+
+        <h3 id="Hybrid-Images">1.9 Hybrid Images</h3>
+        <p>
+          The last part of part A is to use the above function to generate
+          hybrid images, similar to what we did in project 2. In order to create
+          hybrid images compute the noise estimate, by calculating the noise for
+          two different prompts, and then apply a low pass filter on the first
+          image and a high pass filter on the second image. The result would be
+          a hybrid image using the two prompts that we used. Below are a few
+          examples, and I will attach the prompts as well.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos4/skull_hybrid.jpg" alt="t5" />
+            <figcaption>Hybrid image of a skull and a waterfall</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos4/dog_ball.jpg" alt="t5" />
+            <figcaption>Hybrid image of a soccerball and a dog</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="photos4/dog_snow.jpg" alt="t5" />
+            <figcaption>Hybrid image of a dog and a snowboarder</figcaption>
+          </figure>
+        </div>
+
+        <h1>Part B: Diffusion Models from Scratch!</h1>
+        <h2 id="part-b-introduction">Introduction</h2>
+        <p>
+          For part B of this project I trained a UNet model that iteratively
+          denoises an images from the MNIST dataset. I used the algorithms
+          defined in the research paper "Denoising Diffusion Probabilistic
+          Models" by Jonathan Ho, Ajay Jain, and Pieter Abbeel.
+        </p>
+
+        <h2>Part 1: Training a Single-Step Denoising UNet</h2>
+
+        <h3 id="">1.1 Implementing the UNet</h3>
+        <p>
+          For the first part I built a simple one-step denoiser where I
+          optimized over the L2 loss. The denoiser is implemented as a UNet,
+          which contains downsampling and upsampling blocks with skip
+          connections. Below is the architecture of the UNet.
+        </p>
+
+        <figure>
+          <img src="photos5/uncond_unet.png" alt="graph" />
+          <figcaption>Unconditional UNet</figcaption>
+        </figure>
+
+        <h3 id="Implementing-the-UNet">
+          1.2 Using the UNet to Train a Denoiser
+        </h3>
+        <p>
+          Below is a graph of digits from the MNIST dataset with the noisy
+          function applied at different sigma levels including sigma = [0.0,
+          0.2, 0.4, 0.6, 0.8. 1.0].
+        </p>
+
+        <figure>
+          <img src="photos5/noise_graph.jpg" alt="noise" />
+          <figcaption>Varying levels of noise on MNIST digits</figcaption>
+        </figure>
+
+        <h3 id="Training">1.3 Training</h3>
+        <p>
+          In order to train my model to denoise noisy images, I used sigma =
+          0.5, and trained for 5 epochs. I used the UNet architecture defined in
+          section 1.1 with a hidden dimension of 128. For the optimizer I used
+          the Adam optimizer with learning rate of 1e-4. Below is a graph of my
+          training loss.
+        </p>
+
+        <figure>
+          <img src="photos5/train_loss_pt1.jpg" alt="curve" />
+          <figcaption>Training Loss Curve</figcaption>
+        </figure>
+
+        <figure>
+          <img src="photos5/epoch_1_noise_denoise.jpg" alt="e1" />
+          <figcaption>
+            Results on digits from the test set after 1 epoch of training
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="photos5/epoch_5_noise_denoise.jpg" alt="e5" />
+          <figcaption>
+            Results on digits from the test set after 5 epochs of training
+          </figcaption>
+        </figure>
+
+        <h3 id="Testing">1.4 Out-of-Distribution Testing</h3>
+        <p>
+          The denoiser was trained on sigma = 0.5, so we also want to test how
+          this model performs on images with different noise levels. Below are
+          the results on digits from the test set with varying noise levels.
+        </p>
+
+        <figure>
+          <img src="photos5/out_of_sys.jpg" alt="out_of_sys" />
+          <figcaption>
+            Results on digits from the test set with varying noise levels
+            including sigma = [0.0, 0.2, 0.4, 0.6, 0.8. 1.0].
+          </figcaption>
+        </figure>
+
+        <h2>Part 2: Training a Diffusion Model</h2>
+
+        <h3 id="Adding-time">2.1 Adding Time Conditioning to UNet</h3>
+        <p>
+          For the next part we transform the uncondtioned UNet into a
+          conditioned UNet on timestep variable t. I injected the scalar t into
+          the UNet model to condition it, and then trained the model to predict
+          a denoised image. Below is the architecture of the conditioned UNet.
+        </p>
+
+        <figure>
+          <img src="photos5/cond_unet.png" alt="graph" />
+          <figcaption>Conditioned UNet</figcaption>
+        </figure>
+
+        <h3 id="Traing_2">2.2 Training the UNet</h3>
+        <p>
+          In order to train the model, I pick a random image from the training
+          set, a random timestep t, and train the denoiser to predict the noise.
+          I use the MNIST dataset for the training set with a batch size of 128
+          and train for 20 epochs. As mentioned in the instructions I normalize
+          t based on T which is the total number of timesteps(300). I used the
+          Adam optimizer with a learning rate of 1e-3. I also call
+          scheduler.step() after every epoch. I used the time-conditioned UNet
+          architecture defined in section 2.1 with a hidden dimension of 64.
+          Below is a graph of my training loss.
+        </p>
+
+        <figure>
+          <img src="photos5/train_loss_pt2.jpg" alt="curve" />
+          <figcaption>Training Loss Curve</figcaption>
+        </figure>
+
+        <h3 id="Sampling_2">2.3 Sampling from the UNet</h3>
+        <p>
+          I used a sampling process similar to the DeepFloyd model from part A,
+          except rather than generating the variance I use the beta list. I also
+          generate a blank noisy canvas to produce the sample. Below are samples
+          generated after the 5th and 20th epochs of training. I use the same
+          random seed in order to produce the same numbers, as you can see below
+          the digits from epoch 20 look slightly better than those from epoch 5.
+        </p>
+
+        <figure>
+          <img src="photos5/epoch_5_cond_unet.jpg" alt="e5" />
+          <figcaption>Results after 5 epochs of training</figcaption>
+        </figure>
+
+        <figure>
+          <img src="photos5/epoch_20_cond_unet.jpg" alt="e5" />
+          <figcaption>Results after 20 epochs of training</figcaption>
+        </figure>
+
+        <h3 id="Training_3">2.4 Adding Class-Conditioning to UNet</h3>
+        <p>
+          For the last model, in order to make the results better and have more
+          control over the generated images, I implemented class conditioning on
+          the UNet for digits 0 through 9. For the conditioning I used a one-hot
+          encoding vector instead of a single scalar. I used the same
+          architecture as part 2.2 except with the addtional condition variable.
+        </p>
+
+        <figure>
+          <img src="photos5/train_loss_pt3.jpg" alt="curve" />
+          <figcaption>Training Loss Curve</figcaption>
+        </figure>
+
+        <h3 id="Sampling_3">2.5 Sampling from the Class-Conditioned UNet</h3>
+        <p>
+          Similar to part 2.3, I generated sampling results for the
+          class-conditioned UNet for 5 and 20 epochs. However, rather than
+          generating random numbers I generate 4 instances of each digit from 0
+          to 9. Below are the results after 5 and 20 epochs of training. I
+          believe that the samples generated for epoch 20 are better than those
+          generated for epoch 5.
+        </p>
+
+        <figure>
+          <img src="photos5/epoch_5_class_unet.jpg" alt="e5" />
+          <figcaption>Results after 5 epochs of training</figcaption>
+        </figure>
+
+        <figure>
+          <img src="photos5/epoch_20_class_unet.jpg" alt="e5" />
+          <figcaption>Results after 20 epochs of training</figcaption>
+        </figure>
+      </div>
+    </div>
+  </body>
+</html>
