@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS 180 Final Projects</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+      <h1>CS 180 Final Projects</h1>
+      <h3>By Ediz Ertekin Jr.</h3>
+    </div>
+
+    <div class="main-container">
+      <div class="sidebar">
+        <ul>
+          <li><strong>P1: Poor Man's Augmented reality</strong></li>
+          <li><a href="#introduction">Introduction</a></li>
+          <li>
+            <a href="#setup">Setup</a>
+          </li>
+          <li>
+            <a href="#input-video">Input Video</a>
+          </li>
+          <li>
+            <a href="#keypoints">Keypoint selection</a>
+          </li>
+          <li>
+            <a href="#3d-axes">Keypoints with known 3D world coordinates</a>
+          </li>
+          <li>
+            <a href="#frame-to-frame"
+              >Propogating Keypoints to other Images in the Video</a
+            >
+          </li>
+          <li>
+            <a href="#draw-cube">Projecting cube in the Scene</a>
+          </li>
+          <li><strong>P2: High Dynamic Range</strong></li>
+          <li><a href="#part-b-introduction">Introduction</a></li>
+          <li>
+            <a href="#input-imgs">Input Images</a>
+          </li>
+          <li>
+            <a href="#rmc">Radiance Map Construction</a>
+          </li>
+          <li>
+            <a href="#mapping">Tone Mapping</a>
+          </li>
+          <li><a href="#hdr-results">HDR Results</a></li>
+          <li><a href="#bw">Bells and Whistles!</a></li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <h1>Project 1: Poor Man's Augmented Reality</h1>
+        <h2 id="introduction">Introduction</h2>
+        <p>
+          For my first final project I chose the augmented reality project and
+          used a rubiks cube as my platform since it had a natural grid that I
+          could plot the correspondence points. After plotting the 2D points on
+          the rubiks cube, I manually labeled the 3D points of the cube. This
+          allowed me to compute a projection matrix and a 3D space axis as I
+          will show below. After computing the 3D space of the cube, I project a
+          3D cube onto the top of the rubiks cube.
+        </p>
+
+        <h2 id="input-video">Input Video</h2>
+        <p>
+          I initially attempted to draw a rectangular grid on a shoe box but
+          then struggled to get the distance of the points to match on height
+          and width. So I decided to pivot and use a rubiks cube since it had a
+          natural grid. Below is a video I took going around the rubiks cube.
+        </p>
+
+        <video class="styled-video" controls loop autoplay muted>
+          <source src="data/rubik2.mp4" type="video/mp4" />
+          Error
+        </video>
+
+        <h2 id="keypoints">Keypoint Selection</h2>
+        <p>
+          Next I extracted the first frame of the video and computed the
+          keypoints located at all of the critical sections on the cube. I
+          intentionally removed a few of the points as they began to move as the
+          side of the cube goes out of frame in the following part. I computed
+          29 critical points and computed that the length of the cube was 2.1
+          inches and the distance between each points was 0.7.
+        </p>
+
+        <figure>
+          <img src="data/rubik_point_enumerate.png" alt="points" />
+          <figcaption>Selected keypoints</figcaption>
+        </figure>
+
+        <h2 id="3d-axes">Keypoints with known 3D world coordinates</h2>
+        <p>
+          Next I compute the camera projection matrix and deine the corrected 3D
+          axis points. I then draw the 3d axes on the frame given that (0,0,0)
+          starts at the bottom corner which I intentionally made as the first
+          point in the array.
+        </p>
+
+        <figure>
+          <img src="data/3d_axes_projected.png" alt="3d world" />
+          <figcaption>3D world axes</figcaption>
+        </figure>
+
+        <h2 id="frame-to-frame">
+          Propogating Keypoints to other Images in the Video
+        </h2>
+        <p>
+          After calculating the projection matrix and computing the axes, I used
+          an off the shelf tracker, cv2.calcOpticalFlowPyrLK() to propogate
+          keypoints to the other frames of the video. This off the shelf tracker
+          uses the Lucas-Kanade method to track the keypoints. I use the optical
+          flow estimation to maintain the correspondence between the 3D points
+          and their 2D image projections per frame. Once the keypoints are
+          tracked for each frame, I apply solvePnP() to estimate the camera pose
+          for that particular frame.
+        </p>
+
+        <video class="styled-video" controls loop autoplay muted>
+          <source src="data/rubik_tracked.mp4" type="video/mp4" />
+          Error
+        </video>
+
+        <h2 id="draw-cube">Projecting cube in the Scene</h2>
+        <p>
+          Once I solved for the camera projection matrix which maps the 2D image
+          coordinates to their 3D coordinates of points in the world. I then
+          decompose the projection matrix into the intrinsic camera parameters
+          using cv2.decomposeProjectionMatrix(). These intrinsic parameters
+          include the camera's focal length, principal point, and orientation in
+          space.
+          <br />
+          <br />
+          After I computed the projection matrix and computed the camera
+          intrinsic parameters, I project a 3D cube onto four of the points on
+          the top of the rubiks cube. To do this, I first define the cube in
+          local coordinates and then map it into the world coordinate system by
+          using the direction vectors derived from the selected four points.
+          With the camera intrinsics fixed, I track the reference points
+          frame-by-frame using the optical flow function as mentioned above. I
+          then apply solvePnP() to update the camera's pose for that frame, and
+          then projectPoints() to place the 3D cube consistently in the scene.
+          This allows me to compute a 3d artificial cube on top of the rubiks
+          cube.
+        </p>
+
+        <video class="styled-video" controls loop autoplay muted>
+          <source src="data/rubik_cubed.mp4" type="video/mp4" />
+          Error
+        </video>
+
+        <div class="page-divider"></div>
+
+        <h1>Project 2: High Dynamic Range</h1>
+        <h2 id="part-b-introduction">Introduction</h2>
+        <p>
+          For my second project I worked on the High Dynamic Range imaging
+          project from Brown University. This project included starter code as
+          well as various sets of stationary images. I used the starter images
+          to create a radiance map and then tone map the images to produce the
+          HDR images. I then used the Durand tone mapping function to produce
+          the final results which I have attached below.
+        </p>
+
+        <h2 id="input-imgs">Input Images</h2>
+        <p>
+          The starter images are all various scenes with multiple captures at
+          varying exposures. The longer the exposure, the more light is
+          captured.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/17_1.jpg" alt="im1" />
+            <figcaption>17 Seconds</figcaption>
+          </figure>
+          <figure>
+            <img src="data/3_1.jpg" alt="im2" />
+            <figcaption>3 Seconds</figcaption>
+          </figure>
+          <figure>
+            <img src="data/1_4.jpg" alt="im4" />
+            <figcaption>1/4 Second</figcaption>
+          </figure>
+          <figure>
+            <img src="data/1_25.jpg" alt="im3" />
+            <figcaption>1/25 Second</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="rmc">Radiance Map Construction</h2>
+        <p>
+          The observed pixel value <i>Z<sub>ij</sub></i> for pixel <i>i</i> in
+          image <i>j</i> is a function of unknown scene radiance and known
+          exposure duration:
+          <i>Z<sub>ij</sub> = f(E<sub>i</sub> Δt<sub>j</sub>)</i>. Here,
+          <i>E<sub>i</sub></i> is the unknown scene radiance at pixel <i>i</i>,
+          and scene radiance integrated over some time
+          <i>E<sub>i</sub> Δt<sub>j</sub></i> is the exposure at a given pixel.
+          In general, <i>f</i> might be a somewhat complicated pixel response
+          curve.
+        </p>
+        <p>
+          By implementing the solve_g() function which returns the imaging
+          system's response function g as well as the log film irradiance values
+          for the observed pixels. This maps from pixel values (from 0 to 255)
+          to the log of exposure values:
+          <i>g(Z<sub>ij</sub>) = ln(E<sub>i</sub>) + ln(t<sub>j</sub>)</i>
+          (equation 2 in Debevec). Given that the images are stationary across
+          all frames the scene radiance
+          <i>E<sub>i</sub></i> is constant for a given pixel across all images,
+          and the exposure time <i>t<sub>j</sub></i> is known.
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="data/exposure.png" alt="graphs" />
+            <figcaption></figcaption>
+          </figure>
+        </div>
+
+        <p>
+          Next I implemented the hdr() function which takes in the imaging
+          system's response function g (per channel), a weighting function for
+          pixel intensity values, and an exposure matrix containing the log
+          shutter speed for each image, and reconstructs the HDR radiance map
+          using the description in section 2.2 of Debevec. This includes the
+          following formula:
+          <i>ln(E<sub>i</sub>) = g(Z<sub>ij</sub>) - ln(Δt<sub>j</sub>)</i>.
+          (equation 5 in Debevec)
+        </p>
+
+        <div class="image-container">
+          <figure>
+            <img src="data/arch/hdr_radiance_map_mean.png" alt="mean channel" />
+            <figcaption>Mean radiance map</figcaption>
+          </figure>
+          <figure>
+            <img src="data/arch/hdr_radiance_map.png" alt="per channel" />
+            <figcaption>Per channel radiance map</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="mapping">Tone Mapping</h2>
+        <p>
+          After I computed the HDR radiance map, the next step was to implement
+          tone mapping which compresses the dynamic range of an image allowing
+          you to see detail in both bright and dark regions. I implemented two
+          mapping operators, the first one is called Global simple which applies
+          a pixel-wise transform:
+          <i>E<sub>i</sub>' = E<sub>i</sub> / (1 + E<sub>i</sub>)</i> and then I
+          also normalized the results. The second one is called the Durand
+          operator which I implemented using the following steps. First I
+          compute the intensity which is the mean of hdr_radiance_map. Next I
+          compute chrominance channels which seperates the channels into R,G,B
+          and computes each channel divided by the intensity. Next I compute the
+          log intensity to use in the cv2 function bilateralFilter() then we can
+          compute the base layer. After that I scale the base layer and
+          reconstruct the log intensity and then convert back to linear scale. I
+          then reconstruct the color channels and stack them. Finally I
+          normalize the results, and apply a gamma correction.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/arch/global_scale.png" alt="global scale" />
+            <figcaption>Global Scale</figcaption>
+          </figure>
+          <figure>
+            <img src="data/arch/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/arch/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="hdr-results">HDR Results</h2>
+        <p>
+          Below are my results which include the global simple and durand output
+          for the Arch, Bonsai, Chapel, Garage, Garden, House, Mug, and Window
+          photo sets. For Garden and House photos, I normalized in the HDR
+          function while in log space in order to produce a better simple and
+          Durand image. I used a gamma variable of 0.5 in my Durand function in
+          the cases where I needed to normalize in the log space. Where as, for
+          the other images I used a gamma of 2.5 in the Durand function in order
+          to increase the brighness of the image.
+        </p>
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/arch/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/arch/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Bonsai/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Bonsai/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Chapel/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Chapel/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Garage/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Garage/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Garden/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Garden/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/House/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/House/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Mug/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Mug/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Window/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Window/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+        </div>
+
+        <h2 id="bw">Bells and Whistles!</h2>
+        <p>
+          For my bells and whistles I used my own images and ran them through
+          the HDR implementation. I used a set of images of my desk and stacked
+          some boxes to create a stationary place to put my camera. I captured 6
+          frames with varying exposures. Although I think I still slightly moved
+          the camera between shots while I was changing the exposure. Below are
+          my results.
+        </p>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/desk_input/1_1.JPG" alt="im1" />
+            <figcaption>1 Seconds</figcaption>
+          </figure>
+          <figure>
+            <img src="data/desk_input/1_3.JPG" alt="im2" />
+            <figcaption>1/3 Seconds</figcaption>
+          </figure>
+          <figure>
+            <img src="data/desk_input/1_10.JPG" alt="im3" />
+            <figcaption>1/10 Second</figcaption>
+          </figure>
+          <figure>
+            <img src="data/desk_input/1_30.JPG" alt="im4" />
+            <figcaption>1/30 Second</figcaption>
+          </figure>
+          <figure>
+            <img src="data/desk_input/1_60.JPG" alt="im5" />
+            <figcaption>1/60 Second</figcaption>
+          </figure>
+          <figure>
+            <img src="data/desk_input/1_125.JPG" alt="im6" />
+            <figcaption>1/125 Second</figcaption>
+          </figure>
+        </div>
+
+        <div class="image-container">
+          <figure>
+            <img src="data/Desk/hdr_radiance_map_mean.png" alt="mean channel" />
+            <figcaption>Mean radiance map</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Desk/hdr_radiance_map.png" alt="per channel" />
+            <figcaption>Per channel radiance map</figcaption>
+          </figure>
+        </div>
+
+        <div class="horizontal-scroll">
+          <figure>
+            <img src="data/Desk/durand.png" alt="Durand" />
+            <figcaption>Durand</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Desk/global_simple.png" alt="global simple" />
+            <figcaption>Global Simple</figcaption>
+          </figure>
+          <figure>
+            <img src="data/Desk/global_scale.png" alt="global scale" />
+            <figcaption>Global Scale</figcaption>
+          </figure>
+        </div>
+
+        <h2>Conclusion</h2>
+        <p>
+          I enjoyed working on these projects, I particularily liked the AR
+          project as I thought the final output was very fascinating and being
+          able to use off the shelf trackers was also a cool because it gave me
+          practice with real world libraries. I also enjoyed the HDR project as
+          I found the results to be very interesting and I learned a lot about
+          how to manipulate images to produce a better result.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

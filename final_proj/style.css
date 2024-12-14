@@ -1,0 +1,162 @@
+body {
+  font-family: "Menlo", Courier, Consolas; /* Changed to monospace font */
+  line-height: 1.6;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  text-align: center;
+  background-color: #000078;
+  color: white;
+  padding: 20px;
+  width: calc(100% - 20%);
+  margin-left: 20%;
+  box-sizing: border-box;
+}
+
+h1 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.main-container {
+  display: flex;
+  padding: 20px;
+  margin-left: 20%;
+  box-sizing: border-box;
+  width: calc(100% - 20%);
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: 20%;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-right: 2px solid #ddd;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 10px;
+}
+
+.sidebar a {
+  color: black;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+
+/* Content Styling */
+.content {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.content h2 {
+  border-bottom: 2px solid #baa22e;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.content img {
+  width: 50%;
+  height: auto;
+  margin: 20px auto;
+  display: block;
+  border: 5px solid #000;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+p {
+  margin-bottom: 20px;
+}
+
+figure {
+  margin: 20px auto;
+  text-align: center;
+  width: 69%;
+}
+
+figcaption {
+  margin-top: 5px;
+  font-style: italic;
+  font-size: 1em;
+}
+
+.image-container {
+  display: flex; /* Aligns figures side-by-side */
+  justify-content: center; /* Centers the figures horizontally */
+  align-items: flex-start; /* Aligns figures to the top */
+  gap: 30px; /* Adds spacing between figures */
+  margin-bottom: 40px;
+}
+
+.image-container img {
+  width: 500px;
+  height: auto;
+  margin: 20px auto;
+  display: block;
+}
+
+.stack-image {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.stack-image img {
+  width: 100%;
+  height: auto;
+}
+
+.horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.horizontal-scroll img {
+  width: 500px;
+  height: auto;
+  margin-right: 10px;
+  border-radius: 10px;
+}
+
+.styled-video {
+  display: block;
+  margin: 20px auto; /* Centers the video horizontally */
+  width: 50%; /* Matches the image width */
+  max-width: 600px;
+  height: auto;
+  border: 5px solid #000;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.page-divider {
+  width: 100%;
+  height: 2px;
+  background-color: #baa22e;
+  margin: 40px 0; /* Adds spacing above and below the divider */
+}
